@@ -1,10 +1,15 @@
 VERSION := 0.0.1
 
-SRC_PATH := src
+ROOT ?= .
+SRC_PATH := $(ROOT)/src
+UTIL_PATH := $(SRC_PATH)/util
 
 SRC := cpm
 SRC_CODE := $(SRC:%=$(SRC_PATH)/%.c)
 SRC_HEADER := $(SRC_CODE:%.c=%.h)
+UTIL := render util
+UTIL_CODE := $(UTIL:%=$(UTIL_PATH)/%.c)
+UTIL_HEADER := $(UTIL_CODE:%.c=%.h)
 
 INCLUDE_PATH := $(SRC_PATH)
 
