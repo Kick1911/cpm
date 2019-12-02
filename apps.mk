@@ -1,11 +1,11 @@
 include config.mk
 
 APPS_PATH := src/apps
-APPS := init component #util dependent
-APP_PHONY = $(APPS:%=%.phony)
+APPS := init component
+APP_PHONY := $(APPS:%=%.phony)
 APPS := $(APPS:%=$(APPS_PATH)/%)
 APP_CODE := $(APPS:%=%.c)
-APP_OBJS := $(APPS:%=%.o)
+APP_OBJS := $(APPS:%=%.o) $(UTIL_CODE:%.c=%.o)
 APP_STRUCT_PARTIAL := $(APPS_PATH)/apps_struct.h.partial
 APP_FUNC_PARTIAL := $(APPS_PATH)/apps_func.h.partial
 APP_PARTIALS := $(APP_STRUCT_PARTIAL) $(APP_FUNC_PARTIAL)

@@ -6,63 +6,90 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
+#include <limits.h>
+#include <util/util.h>
 
 struct stat st = {0};
 
-void handle_tree_node(tree_node_t* n){
-    switch(n->type){
+int make_file(char* name, int type, char* data){
+    FILE* fp;
+    char buffer[PATH_MAX*2] = {0};
+    strcat(buffer, "./");
+    strcat(buffer, name);
+    printf("Creating %s\n", buffer);
+    switch(type){
         case TREE_NODE_DIR:
-            char buffer[255];
-            strcat(buffer, "./");
-            strcat(buffer, n->name);
             if (stat(buffer, &st) == -1)
-                mkdir(buffer, 0700);
+                if(mkdir(buffer, 0700)){
+                    fprintf(stderr, "Error creating directory: %s\n", name);
+                    goto error;
+                }
         break;
         case TREE_NODE_FILE:
+            fp = fopen(buffer, "w");
+            if(!fp) {
+                fprintf(stderr, "Error creating file: %s\n", name);
+                goto close_file_and_error;
+            }
+            if(data)
+                fwrite(data, sizeof(char), strlen(data), fp);
+            fclose(fp);
         break;
         default:
-        break;
+            fprintf(stderr, "Error not Directory or File\n");
     }
+    return 0;
+    close_file_and_error:
+        fclose(fp);
+    error:
+        return 1;
 }
 
-void bfs(tree_node_t* root, void (*cb)(tree_node_t*)){
-    tree_node_t* stack[256];
-    tree_node_t** s_ptr = stack;
-    *s_ptr++ = root;
-    while( s_ptr - stack > 0 ){
-        tree_node_t** child_p;
-        tree_node_t* temp = *--s_ptr;
-        cb(temp);
-        child_p = temp->children;
-        while(*child_p)
-            *s_ptr++ = *child_p++;
-    }
-}
+#define _BR(line) line "\n"
+#define PROJECT_MK \
+    _BR("")
+
+#define APP_MAKEFILE \
+    _BR("include project.mk") \
+    _BR("")
 
 CPM_APP_FUNCTION(init){
+    #define _SRC "/src"
     /* Define Directory tree */
-    tree_node_t root = {"No Name", TREE_NODE_DIR, NULL, NULL};
-    tree_node_t* root_children[4];
-    tree_node_t* src_children[4];
+    char path[PATH_MAX*2], *app;
+    app = xstrcpy(path, *args);
 
-    tree_node_t src = {"src", TREE_NODE_DIR, NULL, NULL};
-    tree_node_t utils = {"utils", TREE_NODE_DIR, NULL, NULL};
-    tree_node_t components = {"components", TREE_NODE_DIR, NULL, NULL};
-    tree_node_t dependents = {"dependents", TREE_NODE_DIR, NULL, NULL};
-    tree_node_t tests = {"tests", TREE_NODE_DIR, NULL, NULL};
-    tree_node_t project_makefile = {"project.mk", TREE_NODE_FILE, NULL, NULL};
+    make_file(*args, TREE_NODE_DIR, NULL);
 
-    root_children[0] = &src;
-    root_children[1] = &tests;
-    root_children[2] = &project_makefile;
-    root_children[3] = NULL;
-    src_children[0] = &utils;
-    src_children[1] = &components;
-    src_children[2] = &dependents;
-    src_children[3] = NULL;
-    root.name = *args;
-    root.children = root_children;
-    src.children = src_children;
-    bfs(&root, handle_tree_node);
+    xstrcpy(app, "/project.mk");
+    make_file(path, TREE_NODE_FILE, PROJECT_MK);
+
+    xstrcpy(app, "/Makefile");
+    make_file(path, TREE_NODE_FILE, NULL);
+
+    {
+        char* tests, *components;
+        xstrcpy(app, _SRC);
+        make_file(path, TREE_NODE_DIR, NULL);
+
+        xstrcpy(app, _SRC "/utils");
+        make_file(path, TREE_NODE_DIR, NULL);
+
+        components = xstrcpy(app, _SRC "/components");
+        make_file(path, TREE_NODE_DIR, NULL);
+
+        xstrcpy(components, "/Makefile");
+        make_file(path, TREE_NODE_FILE, NULL);
+
+        xstrcpy(app, _SRC "/dependents");
+        make_file(path, TREE_NODE_DIR, NULL);
+
+        tests = xstrcpy(app, _SRC "/tests");
+        make_file(path, TREE_NODE_DIR, NULL);
+
+        xstrcpy(tests, "/Makefile");
+        make_file(path, TREE_NODE_FILE, NULL);
+    }
+
     return 0;
 }
