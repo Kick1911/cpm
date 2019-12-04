@@ -3,6 +3,6 @@
 
 int number_of_digits(int);
 char* xstrcpy(char* dest, const char* src);
-char* xconcat(const char*, const char*);
+char* x_str(const char*, unsigned long);
 
 #endif

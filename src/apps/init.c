@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <limits.h>
+#include <malloc.h>
 #include <util/util.h>
 
 struct stat st = {0};
@@ -45,6 +46,13 @@ int make_file(char* name, int type, char* data){
         return 1;
 }
 
+#define WITH(expression, as, code) \
+    { \
+        void* as = expression; \
+        code; \
+        free(as); \
+    }
+
 #define _BR(line) line "\n"
 #define PROJECT_MK \
     _BR("")
@@ -54,7 +62,6 @@ int make_file(char* name, int type, char* data){
     _BR("")
 
 CPM_APP_FUNCTION(init){
-    #define _SRC "/src"
     /* Define Directory tree */
     char path[PATH_MAX*2], *app;
     app = xstrcpy(path, *args);
@@ -67,29 +74,35 @@ CPM_APP_FUNCTION(init){
     xstrcpy(app, "/Makefile");
     make_file(path, TREE_NODE_FILE, NULL);
 
-    {
-        char* tests, *components;
-        xstrcpy(app, _SRC);
-        make_file(path, TREE_NODE_DIR, NULL);
+    xstrcpy(app, "/src");
+    WITH(x_str(path, PATH_MAX), src_head,
+        char* src_end = strchr(src_head, 0);
+        make_file(src_head, TREE_NODE_DIR, NULL);
 
-        xstrcpy(app, _SRC "/utils");
-        make_file(path, TREE_NODE_DIR, NULL);
+        xstrcpy(src_end, "/utils");
+        make_file(src_head, TREE_NODE_DIR, NULL);
 
-        components = xstrcpy(app, _SRC "/components");
-        make_file(path, TREE_NODE_DIR, NULL);
+        xstrcpy(src_end, "/dependents");
+        make_file(src_head, TREE_NODE_DIR, NULL);
 
-        xstrcpy(components, "/Makefile");
-        make_file(path, TREE_NODE_FILE, NULL);
+        xstrcpy(src_end, "/components");
+        WITH(x_str(src_head, PATH_MAX), comp_head,
+            char* comp_end = strchr(comp_head, 0);
+            make_file(comp_head, TREE_NODE_DIR, NULL);
 
-        xstrcpy(app, _SRC "/dependents");
-        make_file(path, TREE_NODE_DIR, NULL);
+            xstrcpy(comp_end, "/Makefile");
+            make_file(comp_head, TREE_NODE_FILE, NULL);
+        );
 
-        tests = xstrcpy(app, _SRC "/tests");
-        make_file(path, TREE_NODE_DIR, NULL);
+        xstrcpy(src_end, "/tests");
+        WITH(x_str(src_head, PATH_MAX), tests_head,
+            char* tests_end = strchr(tests_head, 0);
+            make_file(tests_head, TREE_NODE_DIR, NULL);
 
-        xstrcpy(tests, "/Makefile");
-        make_file(path, TREE_NODE_FILE, NULL);
-    }
+            xstrcpy(tests_end, "/Makefile");
+            make_file(tests_head, TREE_NODE_FILE, NULL);
+        );
+    );
 
     return 0;
 }

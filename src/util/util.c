@@ -15,8 +15,8 @@ char* xstrcpy(char* dest, const char* src){
     return dest - 1;
 }
 
-char* x_str(char* s){
-    char* buffer = malloc(sizeof(char) * strlen(s) + 1);
-    xstrcpy(buffer, s);
-    return buffer;
+char* x_str(const char* s, size_t l){
+    char* b = malloc(sizeof(char) * strlen(s) + l + 1);
+    xstrcpy(b, s);
+    return b;
 }
