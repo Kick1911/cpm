@@ -1,4 +1,5 @@
 cpm
+temp
 *.o
 *.partial
 *.out

@@ -1,16 +1,15 @@
 #ifndef _CPM_INIT
 #define _CPM_INIT
+#include <limits.h>
 
 #define TREE_NODE_DIR 1
 #define TREE_NODE_FILE 2
 
-typedef struct tree_node tree_node_t;
+typedef struct dir_path dir_path_t;
 
-struct tree_node {
-    char* name;
-    int type;
-    char* data;
-    tree_node_t** children;
+struct dir_path {
+    char path[PATH_MAX*2];
+    char* end;
 };
 
 #endif
