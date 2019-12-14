@@ -12,6 +12,7 @@
 
 int number_of_digits(int);
 char* xstrcpy(char* dest, const char* src);
+char* xstrncpy(char* dest, const char* src, long int);
 char* x_str(const char*, unsigned long);
 
 #endif

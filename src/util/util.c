@@ -4,14 +4,17 @@
 
 int number_of_digits(int n){
     int count = 1;
-    while((n /= 10))
-        count++;
+    while((n /= 10) && count++);
     return count;
 }
 
 char* xstrcpy(char* dest, const char* src){
+    return xstrncpy(dest, src, 0);
+}
+
+char* xstrncpy(char* dest, const char* src, long int n){
     const char* s = src;
-    while((*dest++ = *s++));
+    while((*dest++ = *s++) && --n);
     return dest - 1;
 }
 

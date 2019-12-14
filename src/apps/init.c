@@ -96,7 +96,7 @@ CPM_APP_FUNCTION(init){
     root.end = xstrcpy(root.path, *args);
 
     make_file(&root, "", TREE_NODE_DIR, NULL);
-    WITH(render(PROJECT_MK, args, 1), project_mk,
+    WITH(render(PROJECT_MK, (const char**)args, 1), project_mk,
         make_file(&root, "/project.mk", TREE_NODE_FILE, project_mk);
     );
     make_file(&root, "/config.mk", TREE_NODE_FILE, CONFIG_MK);
@@ -106,8 +106,7 @@ CPM_APP_FUNCTION(init){
     src.end = xstrcpy(src.path, root.path);
 
     make_file(&src, "", TREE_NODE_DIR, NULL);
-    WITH(render("$0.c", args, 1), app_c,
-        printf("WTF %s\n", (char*) app_c);
+    WITH(render("/$0.c", (const char**)args, 1), app_c,
         make_file(&src, app_c, TREE_NODE_FILE, APP_C);
     );
     make_file(&src, _UTILS, TREE_NODE_DIR, NULL);

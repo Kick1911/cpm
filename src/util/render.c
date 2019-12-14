@@ -5,37 +5,39 @@
 #include <string.h>
 #include <assert.h>
 
-#define ARG_FIND_PATTERN ("%[^$]$%d")
+#define ARG_FIND_PATTERN ("$%d")
 #define NULL_STR ("(null)")
 
 char* render(const char* template, const char** args, size_t args_l){
-    int i, post_length = 0;
-    const char* ptr = template;
+    int i, res, post_length = strlen(template);
+    const char* start = template, *end;
     char* post_render, *post_ptr;
 
-    WITH(malloc(sizeof(char) * strlen(template)), buffer,
-        while(sscanf(ptr, ARG_FIND_PATTERN, (char*)buffer, &i) > 1){
-            post_length += strlen(buffer);
-            if(i < args_l && args[i])
-                post_length += strlen(args[i]);
-            else
-                post_length += strlen(NULL_STR);
-            ptr += strlen(buffer) + number_of_digits(i) + 1;
-        }
+    while((start = strchr(start, '$'))){
+        res = sscanf(start, ARG_FIND_PATTERN, &i);
+        if(res < 1) continue;
+        if(i < args_l && args[i])
+            post_length += strlen(args[i]);
+        else
+            post_length += strlen(NULL_STR);
+        post_length -= (1 + number_of_digits(i));
+        start++;
+    }
 
-        post_length += strlen(buffer);
-        post_render = malloc(sizeof(char) * post_length + 1);
-        ptr = template;
-        post_ptr = post_render;
+    post_render = malloc(sizeof(char) * post_length + 1);
+    start = template;
+    post_ptr = post_render;
 
-        while(sscanf(ptr, ARG_FIND_PATTERN, (char*)buffer, &i) > 1){
-            post_ptr = xstrcpy(post_ptr, buffer);
-            post_ptr = xstrcpy(post_ptr,
-                            (i < args_l)?
-                                    args[i]: NULL_STR);
-            ptr += strlen(buffer) + number_of_digits(i) + 1;
-        }
-        xstrcpy(post_ptr, buffer);
-    );
+    while((end = strchr(start, '$'))){
+        res = sscanf(end, ARG_FIND_PATTERN, &i);
+        if(res < 1) continue;
+        if(start < end)
+            post_ptr = xstrncpy(post_ptr, start, end - start + 1);
+        post_ptr = xstrcpy(post_ptr,
+                        (i < args_l)?
+                                args[i]: NULL_STR);
+        start = end + 1 + number_of_digits(i);
+    }
+    xstrcpy(post_ptr, start);
     return post_render;
 }
