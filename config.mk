@@ -18,4 +18,4 @@ UTIL_HEADER := $(UTIL_CODE:%.c=%.h)
 INCLUDE_PATH := $(SRC_PATH)
 
 CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_POSIX_C_SOURCE=2 -DVERSION=\"${VERSION}\"
-CFLAGS  += ${DEBUG} -ansi -pedantic -Wall -Wno-deprecated-declarations ${INCLUDE_PATH:%=-I%} ${CPPFLAGS}
+CFLAGS  += ${DEBUG} -ansi -pedantic -Wall -Wno-deprecated-declarations -I${INCLUDE_PATH} ${CPPFLAGS}
