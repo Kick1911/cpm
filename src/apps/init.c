@@ -31,7 +31,7 @@ int make_file(dir_path_t* d, char* name, int type, char* data){
                 }
         break;
         case TREE_NODE_FILE:
-            fp = fopen(buffer, "w");
+            fp = fopen(buffer, "a");
             if(!fp) {
                 fprintf(stderr, "Error creating file: %s\n", d->path);
                 goto close_file_and_error;
@@ -52,7 +52,7 @@ int make_file(dir_path_t* d, char* name, int type, char* data){
 
 CPM_APP_FUNCTION(init){
     /* Define Directory tree */
-
+    const char* version[] = {VERSION};
     dir_path_t root, src, comp, utils, tests;
     root.end = xstrcpy(root.path, *args);
 
@@ -61,7 +61,10 @@ CPM_APP_FUNCTION(init){
         make_file(&root, "/project.mk", TREE_NODE_FILE, project_mk);
     );
     make_file(&root, "/config.mk", TREE_NODE_FILE, CONFIG_MK);
-    make_file(&root, "/Makefile", TREE_NODE_FILE, APP_MAKEFILE);
+    make_file(&root, "/Makefile", TREE_NODE_FILE, APP_MAKEFILE_1);
+    WITH(render(APP_MAKEFILE_2, (const char**)version, 1), app_makefile_2,
+        make_file(&root, "/Makefile", TREE_NODE_FILE, app_makefile_2);
+    );
 
     xstrcpy(root.end, _SRC);
     src.end = xstrcpy(src.path, root.path);

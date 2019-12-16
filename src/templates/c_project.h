@@ -20,7 +20,7 @@
     _BR("COMP_O = ${COMP_C:%.c=%.o}") \
     _BR("UTILS_O = ${UTILS_C:%.c=%.o}") \
     _BR("") \
-    _BR("LD_LIBRARY_PATH += ${ROOT}") \
+    _BR("LDFLAGS += -L${ROOT}") \
     _BR("CFLAGS += ${DEBUG} -ansi -pedantic -Wall -Wno-deprecated-declarations -I${SRC_PATH}") \
     _BR("")
 
@@ -28,33 +28,37 @@
     _BR("APP_NAME = $0") \
     _BR("")
 
-#define APP_MAKEFILE \
+#define APP_MAKEFILE_1 \
     _BR("include project.mk") \
     _BR(_BR("include config.mk")) \
     _BR(_BR("all: ${APP_NAME}")) \
     _BR("${APP_NAME}: ${SRC_PATH}/${APP_NAME}.c ${COMP_O} ${UTILS_O}") \
     _TR("${CC} $^ -o $@ ${CFLAGS}") \
     _BR("%.o: %.c") \
-    _TR("${CC} -c $< -o $@ ${CFLAGS}") \
+    _TR("${CC} -c $< -o $@ ${CFLAGS} -D STATIC") \
     _BR("") \
-    _BR("CFLAGS += -D STATIC") \
     _BR("static_library: lib${APP_NAME}.a") \
     _BR("") \
     _BR("lib${APP_NAME}.a: ${COMP_O} ${UTILS_O}") \
     _TR("ar -cvq $@ $^") \
+    _BR("")
+
+#define APP_MAKEFILE_2 \
     _BR("") \
-    _BR("CFLAGS += -fPIC") \
-    _BR("shared_library: lib${APP_NAME}.so") \
+    _BR("set_pic:") \
+    _TR("${eval CFLAGS += -fPIC}") \
+    _BR("") \
+    _BR("shared_library: set_pic lib${APP_NAME}.so") \
     _BR("") \
     _BR("lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}") \
-    _TR("${CC} -shared -o $@.1 $^") \
-    _TR("ln -s $@.1 $@") \
+    _TR("${CC} -shared -Wl,-soname,$@ -o $@.$0 $^") \
+    _TR("ln -s $@.$0 $@") \
     _BR("") \
     _BR("clean:") \
     _TR("${RM} ${APP_NAME} lib${APP_NAME}.*") \
     _BR("") \
     _BR(".INTERMEDIATE: ${COMP_O} ${UTILS_O}") \
-    _BR(".PHONY: clean all") \
+    _BR(".PHONY: clean all set_pic") \
     _BR("")
 
 #define APP_C \
@@ -86,11 +90,17 @@
     _BR("include ../config.mk") \
     _BR("") \
     _BR("TESTS_OUT := ${TESTS_C:%.c=%.out}") \
+    _BR("") \
     _BR("all: ${TESTS_OUT}") \
     _BR("") \
     _BR("${TESTS_OUT}: %.out: %.c") \
     _TR("${MAKE} -C .. shared_library") \
-    _TR("${CC} $< -o $@ ${CFLAGS} -l${APP_NAME}") \
+    _TR("${CC} $< -o $@ ${CFLAGS} ${LDFLAGS} -l${APP_NAME}") \
+    _BR("") \
+    _BR("clean:") \
+    _TR("${RM} ${TESTS_OUT}") \
+    _BR("") \
+    _BR(".PHONY: clean all") \
     _BR("")
 
 #define TEST_UTILS_C \

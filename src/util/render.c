@@ -15,12 +15,13 @@ char* render(const char* template, const char** args, size_t args_l){
 
     while((start = strchr(start, '$'))){
         res = sscanf(start, ARG_FIND_PATTERN, &i);
-        if(res < 1) continue;
-        if(i < args_l && args[i])
-            post_length += strlen(args[i]);
-        else
-            post_length += strlen(NULL_STR);
-        post_length -= (1 + number_of_digits(i));
+        if(res > 0){
+            if(i < args_l && args[i])
+                post_length += strlen(args[i]);
+            else
+                post_length += strlen(NULL_STR);
+            post_length -= (1 + number_of_digits(i));
+        }
         start++;
     }
 
@@ -30,13 +31,14 @@ char* render(const char* template, const char** args, size_t args_l){
 
     while((end = strchr(start, '$'))){
         res = sscanf(end, ARG_FIND_PATTERN, &i);
-        if(res < 1) continue;
-        if(start < end)
-            post_ptr = xstrncpy(post_ptr, start, end - start + 1);
-        post_ptr = xstrcpy(post_ptr,
-                        (i < args_l)?
-                                args[i]: NULL_STR);
-        start = end + 1 + number_of_digits(i);
+        post_ptr = xstrncpy(post_ptr, start, end - start + 2);
+        if(res > 0){
+            post_ptr = xstrcpy(post_ptr-1,
+                            (i < args_l)?
+                                    args[i]: NULL_STR);
+            end += number_of_digits(i);
+        }
+        start = end + 1;
     }
     xstrcpy(post_ptr, start);
     return post_render;
