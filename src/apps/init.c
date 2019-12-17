@@ -1,54 +1,12 @@
 #include <cpm.h>
 #include <cpm_apps.h>
 #include <apps/init.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
-#include <string.h>
+#include <stdio.h>
 #include <malloc.h>
 #include <util/util.h>
 #include <util/render.h>
 #include <templates/c_project.h>
-
-struct stat st = {0};
-
-int make_file(dir_path_t* d, char* name, int type, char* data){
-    FILE* fp;
-    char buffer[PATH_MAX*2] = {0};
-
-    xstrcpy(d->end, name);
-    strcat(buffer, "./");
-    strcat(buffer, d->path);
-    printf("Creating %s\n", buffer);
-
-    switch(type){
-        case TREE_NODE_DIR:
-            if (stat(buffer, &st) == -1)
-                if(mkdir(buffer, 0700)){
-                    fprintf(stderr, "Error creating directory: %s\n", d->path);
-                    goto error;
-                }
-        break;
-        case TREE_NODE_FILE:
-            fp = fopen(buffer, "a");
-            if(!fp) {
-                fprintf(stderr, "Error creating file: %s\n", d->path);
-                goto close_file_and_error;
-            }
-            if(data)
-                fwrite(data, sizeof(char), strlen(data), fp);
-            fclose(fp);
-        break;
-        default:
-            fprintf(stderr, "Error not Directory or File\n");
-    }
-    return 0;
-    close_file_and_error:
-        fclose(fp);
-    error:
-        return 1;
-}
 
 CPM_APP_FUNCTION(init){
     /* Define Directory tree */
@@ -66,27 +24,27 @@ CPM_APP_FUNCTION(init){
         make_file(&root, "/Makefile", TREE_NODE_FILE, app_makefile_2);
     );
 
-    xstrcpy(root.end, _SRC);
+    xstrcpy(root.end, "/" _SRC);
     src.end = xstrcpy(src.path, root.path);
 
     make_file(&src, "", TREE_NODE_DIR, NULL);
     WITH(render("/$0.c", (const char**)args, 1), app_c,
         make_file(&src, app_c, TREE_NODE_FILE, APP_C);
     );
-    make_file(&src, _DEP, TREE_NODE_DIR, NULL);
+    make_file(&src, "/" _DEP, TREE_NODE_DIR, NULL);
 
-    xstrcpy(src.end, _UTILS);
+    xstrcpy(src.end, "/" _UTILS);
     utils.end = xstrcpy(utils.path, src.path);
     make_file(&utils, "", TREE_NODE_DIR, NULL);
     make_file(&utils, "/utils.c", TREE_NODE_FILE, UTILS_UTILS_C);
     make_file(&utils, "/utils.h", TREE_NODE_FILE, UTILS_UTILS_H);
 
-    xstrcpy(src.end, _COMP);
+    xstrcpy(src.end, "/" _COMP);
     comp.end = xstrcpy(comp.path, src.path);
 
     make_file(&comp, "", TREE_NODE_DIR, NULL);
 
-    xstrcpy(root.end, _TESTS);
+    xstrcpy(root.end, "/" _TESTS);
     tests.end = xstrcpy(tests.path, root.path);
 
     make_file(&tests, "", TREE_NODE_DIR, NULL);

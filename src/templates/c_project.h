@@ -1,19 +1,19 @@
 #ifndef C_PROJECT_H
 #define C_PROJECT_H
 
-#define _SRC "/src"
-#define _COMP "/components"
-#define _DEP "/dependents"
-#define _TESTS "/tests"
-#define _UTILS "/utils"
+#define _SRC "src"
+#define _COMP "components"
+#define _DEP "dependents"
+#define _TESTS "tests"
+#define _UTILS "utils"
 
 #define CONFIG_MK \
     _BR("ROOT ?= .") \
-    _BR("SRC_PATH = ${ROOT}" _SRC) \
-    _BR("COMP_PATH = ${SRC_PATH}" _COMP) \
-    _BR("DEP_PATH = ${SRC_PATH}" _DEP) \
-    _BR("UTILS_PATH = ${SRC_PATH}" _UTILS) \
-    _BR("TESTS_PATH = ${ROOT}" _TESTS) \
+    _BR("SRC_PATH = ${ROOT}/" _SRC) \
+    _BR("COMP_PATH = ${SRC_PATH}/" _COMP) \
+    _BR("DEP_PATH = ${SRC_PATH}/" _DEP) \
+    _BR("UTILS_PATH = ${SRC_PATH}/" _UTILS) \
+    _BR("TESTS_PATH = ${ROOT}/" _TESTS) \
     _BR("COMP_C = ${shell find ${COMP_PATH} -name '*.c'}") \
     _BR("UTILS_C = ${shell find ${UTILS_PATH} -name '*.c'}") \
     _BR("TESTS_C = ${shell find ${TESTS_PATH} -name '*.c'}") \
@@ -115,5 +115,16 @@
     _TR(");") \
     _TR("return 0;") \
     _BR(_BR("}"))
+
+#define COMP_C \
+    _BR("#include <" _COMP "/$0.h>") \
+    _BR("") \
+    _BR("/* Insert functions here */") \
+
+#define COMP_H \
+    _BR("#ifndef $0_H") \
+    _BR("#define $0_H") \
+    _BR("") \
+    _BR("#endif")
 
 #endif
