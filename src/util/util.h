@@ -1,8 +1,7 @@
 #ifndef _CPM_UTIL
 #define _CPM_UTIL
 #include <limits.h>
-#define TREE_NODE_DIR 1
-#define TREE_NODE_FILE 2
+#include <sys/stat.h>
 
 #define _BR(line) line "\n"
 #define _TR(line) "\t" _BR(line)
@@ -27,6 +26,7 @@ int number_of_digits(int);
 char* xstrcpy(char* dest, const char* src);
 char* xstrncpy(char* dest, const char* src, long int);
 char* x_str(const char*, unsigned long);
-int make_file(dir_path_t*, char*, int, char*);
+int make_file(dir_path_t*, char*, __mode_t, char*);
+int make_dir(dir_path_t*, __mode_t);
 
 #endif

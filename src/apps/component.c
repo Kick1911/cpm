@@ -17,7 +17,7 @@ CPM_APP_FUNCTION(component){
 
     WITH(render("/$0.c", (const char**)args, 1), comp_c_filename,
         WITH(render(COMP_C, (const char**)args, 1), comp_c,
-            make_file(&comp, comp_c_filename, TREE_NODE_FILE, comp_c);
+            make_file(&comp, comp_c_filename, FILE_PERMISSIONS, comp_c);
         );
     );
 
@@ -32,7 +32,7 @@ CPM_APP_FUNCTION(component){
 
         *header_args = comp_name_upper;
         WITH(render(COMP_H, header_args, 1), comp_h,
-            make_file(&comp, comp_h_filename, TREE_NODE_FILE, comp_h);
+            make_file(&comp, comp_h_filename, FILE_PERMISSIONS, comp_h);
         );
     );
     return 0;

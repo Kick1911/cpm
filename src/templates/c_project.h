@@ -1,6 +1,9 @@
 #ifndef C_PROJECT_H
 #define C_PROJECT_H
 
+#define FILE_PERMISSIONS 0644
+#define DIR_PERMISSIONS 0700
+
 #define _SRC "src"
 #define _COMP "components"
 #define _DEP "dependents"
