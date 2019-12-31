@@ -9,8 +9,9 @@
 #define _DEP "dependents"
 #define _TESTS "tests"
 #define _UTILS "utils"
+#define _INCLUDE "include"
 
-#define CONFIG_MK \
+#define CONFIG_MK_1 \
     _BR("ROOT ?= .") \
     _BR("SRC_PATH = ${ROOT}/" _SRC) \
     _BR("COMP_PATH = ${SRC_PATH}/" _COMP) \
@@ -22,9 +23,12 @@
     _BR("TESTS_C = ${shell find ${TESTS_PATH} -name '*.c'}") \
     _BR("COMP_O = ${COMP_C:%.c=%.o}") \
     _BR("UTILS_O = ${UTILS_C:%.c=%.o}") \
+    _BR("INCLUDE_PATH = ${ROOT}/" _INCLUDE) \
     _BR("") \
     _BR("LDFLAGS += -L${ROOT}") \
-    _BR("CFLAGS += ${DEBUG} -ansi -pedantic -Wall -Wno-deprecated-declarations -I${SRC_PATH}") \
+
+#define CONFIG_MK_2 \
+    _BR("CFLAGS += ${DEBUG} -ansi -pedantic -Wall -Wno-deprecated-declarations -I${SRC_PATH} -I${INCLUDE_PATH}") \
     _BR("")
 
 #define PROJECT_MK \
@@ -33,6 +37,7 @@
 
 #define APP_MAKEFILE_1 \
     _BR("include project.mk") \
+    _BR("include Makefile.in") \
     _BR(_BR("include config.mk")) \
     _BR(_BR("all: ${APP_NAME}")) \
     _BR("${APP_NAME}: ${SRC_PATH}/${APP_NAME}.c ${COMP_O} ${UTILS_O}") \
@@ -57,11 +62,16 @@
     _TR("${CC} -shared -Wl,-soname,$@ -o $@.$0 $^") \
     _TR("ln -s $@.$0 $@") \
     _BR("") \
+    _BR("install:") \
+    _TR("@cp ${APP_NAME} ${CONFIG_INSTALL_PATH}/bin 2> /dev/null || :") \
+    _TR("@cp ${INCLUDE_PATH}/* ${CONFIG_INSTALL_PATH}/include 2> /dev/null || :") \
+    _TR("@cp lib${APP_NAME}.* ${CONFIG_INSTALL_PATH}/lib 2> /dev/null || :") \
+    _BR("") \
     _BR("clean:") \
     _TR("${RM} ${APP_NAME} lib${APP_NAME}.*") \
     _BR("") \
     _BR(".INTERMEDIATE: ${COMP_O} ${UTILS_O}") \
-    _BR(".PHONY: clean all set_pic") \
+    _BR(".PHONY: install clean all set_pic") \
     _BR("")
 
 #define APP_C \

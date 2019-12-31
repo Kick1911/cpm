@@ -11,24 +11,29 @@
 CPM_APP_FUNCTION(init){
     /* Define Directory tree */
     const char* version[] = {VERSION};
-    dir_path_t root, src, comp, utils, tests;
+    dir_path_t root, src, comp, utils, tests, include;
     root.end = xstrcpy(root.path, *args);
 
     make_dir(&root, DIR_PERMISSIONS);
     WITH(render(PROJECT_MK, (const char**)args, 1), project_mk,
         make_file(&root, "/project.mk", FILE_PERMISSIONS, project_mk);
     );
-    make_file(&root, "/config.mk", FILE_PERMISSIONS, CONFIG_MK);
-    make_file(&root, "/Makefile", FILE_PERMISSIONS, APP_MAKEFILE_1);
+    make_file(&root, "/config.mk", FILE_PERMISSIONS, CONFIG_MK_1);
+    make_file(&root, "/config.mk", FILE_PERMISSIONS, CONFIG_MK_2);
     make_file(&root, "/configure", 0755, APP_CONFIGURE);
+    make_file(&root, "/Makefile", FILE_PERMISSIONS, APP_MAKEFILE_1);
     WITH(render(APP_MAKEFILE_2, (const char**)version, 1), app_makefile_2,
         make_file(&root, "/Makefile", FILE_PERMISSIONS, app_makefile_2);
     );
 
+    xstrcpy(root.end, "/" _INCLUDE);
+    include.end = xstrcpy(include.path, root.path);
+    make_dir(&include, DIR_PERMISSIONS);
+
     xstrcpy(root.end, "/" _SRC);
     src.end = xstrcpy(src.path, root.path);
-
     make_dir(&src, DIR_PERMISSIONS);
+
     WITH(render("/$0.c", (const char**)args, 1), app_c,
         make_file(&src, app_c, FILE_PERMISSIONS, APP_C);
     );
