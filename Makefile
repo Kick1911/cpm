@@ -18,6 +18,9 @@ partials: clean_partials $(APP_PHONY)
 clean_partials:
 	$(RM) $(APP_PARTIALS)
 
+install:
+	@cp $(SRC) /opt/bin 2> /dev/null || :
+
 clean: clean_partials
 	$(RM) $(SRC)
 

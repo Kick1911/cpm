@@ -10,7 +10,7 @@
 
 CPM_APP_FUNCTION(init){
     /* Define Directory tree */
-    const char* version[] = {VERSION};
+    const char* version[] = {"0.0.1"};
     dir_path_t root, src, comp, utils, tests, include;
     root.end = xstrcpy(root.path, *args);
 
