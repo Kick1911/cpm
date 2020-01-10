@@ -1,0 +1,23 @@
+#!/usr/bin/bash
+export CONFIG_INSTALL_PATH="/usr/local/"
+
+for arg in "$@"; do
+	if [[ $arg =~ --prefix=(.+) ]];then
+		CONFIG_INSTALL_PATH="${BASH_REMATCH[1]}"
+	fi
+done
+
+echo '' > Makefile.in
+for x in `env | grep "^CONFIG_"`; do
+	echo "$x" >> Makefile.in
+done
+echo '' >> Makefile.in
+if [[ `command -v gcc` ]]; then
+	echo 'gcc found'
+elif [[ `command -v clang` ]]; then
+	echo 'clang found'
+else
+	echo 'Compatible C compiler not found.'
+	exit 1
+fi
+

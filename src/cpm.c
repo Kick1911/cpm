@@ -5,12 +5,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <limits.h>
+#include <linux/limits.h>
 
-#include <apps/apps_func.h.partial>
+CPM_APP_FUNCTION(init);
+CPM_APP_FUNCTION(component);
 
 const cpm_app_t cpm_apps[] = {
-    #include <apps/apps_struct.h.partial>
+    CPM_REGISTER_APP(init),
+    CPM_REGISTER_APP(component),
     {NULL, NULL}
 };
 

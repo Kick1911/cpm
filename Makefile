@@ -1,28 +1,38 @@
+include project.mk
+include Makefile.in
 include config.mk
-include apps.mk
 
-all: partials $(SRC)
+all: ${APP_NAME}
 
+${APP_NAME}: ${SRC_PATH}/${APP_NAME}.c ${COMP_O} ${UTILS_O}
+	${CC} $^ -o $@ ${CFLAGS}
 %.o: %.c
-	$(CC) -c $< $(CFLAGS) -o $@
+	${CC} -c $< -o $@ ${CFLAGS} -D STATIC
 
-$(SRC): $(SRC_CODE) $(SRC_HEADER) $(APP_OBJS)
-	$(CC) $< $(APP_OBJS) $(CFLAGS) -o $@
+static_library: lib${APP_NAME}.a
 
-$(APP_PHONY):
-	$(eval APP := $(@:%.phony=%))
-	$(call add_app,$(APP))
+lib${APP_NAME}.a: ${COMP_O} ${UTILS_O}
+	ar -cvq $@ $^
 
-partials: clean_partials $(APP_PHONY)
 
-clean_partials:
-	$(RM) $(APP_PARTIALS)
+set_pic:
+	${eval CFLAGS += -fPIC}
+
+shared_library: set_pic lib${APP_NAME}.so
+
+lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
+	${CC} -shared -Wl,-soname,$@ -o $@.0.0.1 $^
+	ln -s $@.0.0.1 $@
 
 install:
-	@cp $(SRC) /opt/bin 2> /dev/null || :
+	@cp ${APP_NAME} ${CONFIG_INSTALL_PATH}/bin 2> /dev/null || :
+	@cp ${INCLUDE_PATH}/* ${CONFIG_INSTALL_PATH}/include 2> /dev/null || :
+	@cp lib${APP_NAME}.* ${CONFIG_INSTALL_PATH}/lib 2> /dev/null || :
 
-clean: clean_partials
-	$(RM) $(SRC)
+clean:
+	${RM} ${APP_NAME} lib${APP_NAME}.*
+	${MAKE} -C tests clean
+	${MAKE} -C src clean
 
-.INTERMEDIATE: $(APP_OBJS)
-.PHONY: clean $(APP_PHONY) clean_partials partials all
+.PHONY: install clean all set_pic
+

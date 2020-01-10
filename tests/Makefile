@@ -1,19 +1,17 @@
 ROOT = ..
+include ../project.mk
 include ../config.mk
-UTIL_TEST := $(UTIL:%=test_%.out)
-UTIL_OBJS := $(UTIL_CODE:%.c=%.o)
-APPS_TEST := $(APPS:%=test_%.out)
-APPS_OBJS := $(APPS_CODE:%.c=%.o)
 
-all: $(UTIL_TEST)
+TESTS_OUT := ${TESTS_C:%.c=%.out}
 
-$(UTIL_TEST): %.out : $(UTIL_OBJS) %.c
-	$(CC) $^ -o $@ $(CFLAGS)
+all: ${TESTS_OUT}
 
-$(APPS_TEST): test_%.out : $(UTIL_OBJS) $(APPS_PATH)/%.o test_%.c
-	$(CC) $^ -o $@ $(CFLAGS)
+${TESTS_OUT}: %.out: %.c
+	${MAKE} -C .. shared_library
+	${CC} $< -o $@ ${CFLAGS} ${LDFLAGS} -l${APP_NAME}
 
-$(UTIL_OBJS) $(SRC_OBJS): %.o : %.c
-	$(MAKE) $(@:../%.o=%.o) -C ..
+clean:
+	${RM} ${TESTS_OUT}
 
-.PHONY: all
+.PHONY: clean all
+
