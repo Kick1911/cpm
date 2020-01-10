@@ -1,12 +1,11 @@
 #include <cpm.h>
 #include <cpm_apps.h>
-#include <apps/init.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <malloc.h>
-#include <util/util.h>
-#include <util/render.h>
-#include <templates/c_project.h>
+#include <utils/util.h>
+#include <utils/render.h>
+#include <components/c_project.h>
 
 CPM_APP_FUNCTION(init){
     /* Define Directory tree */

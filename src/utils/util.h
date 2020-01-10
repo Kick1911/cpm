@@ -1,6 +1,6 @@
 #ifndef _CPM_UTIL
 #define _CPM_UTIL
-#include <limits.h>
+#include <linux/limits.h>
 #include <sys/stat.h>
 
 #define _BR(line) line "\n"

@@ -1,5 +1,5 @@
-#include <util/render.h>
-#include <util/util.h>
+#include <utils/render.h>
+#include <utils/util.h>
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>

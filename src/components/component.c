@@ -2,9 +2,9 @@
 #include <cpm_apps.h>
 #include <stdio.h>
 #include <malloc.h>
-#include <templates/c_project.h>
-#include <util/util.h>
-#include <util/render.h>
+#include <components/c_project.h>
+#include <utils/util.h>
+#include <utils/render.h>
 #include <ctype.h>
 
 CPM_APP_FUNCTION(component){

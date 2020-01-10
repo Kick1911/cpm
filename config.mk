@@ -1,21 +1,16 @@
-VERSION := 0.0.1
-
 ROOT ?= .
-SRC_PATH := $(ROOT)/src
-UTIL_PATH := $(SRC_PATH)/util
-APPS_PATH := $(SRC_PATH)/apps
+SRC_PATH = ${ROOT}/src
+COMP_PATH = ${SRC_PATH}/components
+DEP_PATH = ${SRC_PATH}/dependents
+UTILS_PATH = ${SRC_PATH}/utils
+TESTS_PATH = ${ROOT}/tests
+COMP_C = ${shell find ${COMP_PATH} -name '*.c'}
+UTILS_C = ${shell find ${UTILS_PATH} -name '*.c'}
+TESTS_C = ${shell find ${TESTS_PATH} -name '*.c'}
+COMP_O = ${COMP_C:%.c=%.o}
+UTILS_O = ${UTILS_C:%.c=%.o}
+INCLUDE_PATH = ${ROOT}/include
 
-SRC := cpm
-SRC_CODE := $(SRC:%=$(SRC_PATH)/%.c)
-SRC_HEADER := $(SRC_CODE:%.c=%.h)
-APPS := component init
-APPS_CODE := $(APPS:%=$(APPS_PATH)/%.c)
-APPS_HEADER := $(APPS_CODE:%.c=%.h)
-UTIL := render util
-UTIL_CODE := $(UTIL:%=$(UTIL_PATH)/%.c)
-UTIL_HEADER := $(UTIL_CODE:%.c=%.h)
+LDFLAGS += -L${ROOT}
+CFLAGS += ${DEBUG} -ansi -pedantic -Wall -Wno-deprecated-declarations -I${SRC_PATH} -I${INCLUDE_PATH}
 
-INCLUDE_PATH := $(SRC_PATH)
-
-CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_POSIX_C_SOURCE=2 -DVERSION=\"${VERSION}\"
-CFLAGS  += ${DEBUG} -ansi -pedantic -Wall -Wno-deprecated-declarations -I${INCLUDE_PATH} ${CPPFLAGS}
