@@ -22,7 +22,7 @@ shared_library: set_pic lib${APP_NAME}.so
 
 lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
 	${CC} -shared -Wl,-soname,$@ -o $@.0.0.1 $^
-	ln -s $@.0.0.1 $@
+	ln -sf $@.0.0.1 $@
 
 install:
 	@cp ${APP_NAME} ${CONFIG_INSTALL_PATH}/bin 2> /dev/null || :
