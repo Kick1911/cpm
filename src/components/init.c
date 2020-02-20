@@ -21,6 +21,7 @@ CPM_APP_FUNCTION(init){
     make_file(&root, "/config.mk", FILE_PERMISSIONS, CONFIG_MK_2);
     make_file(&root, "/configure", 0755, APP_CONFIGURE);
     make_file(&root, "/Makefile", FILE_PERMISSIONS, APP_MAKEFILE_1);
+    make_file(&root, "/Makefile.in", FILE_PERMISSIONS, "");
     WITH(render(APP_MAKEFILE_2, (const char**)version, 1), app_makefile_2,
         make_file(&root, "/Makefile", FILE_PERMISSIONS, app_makefile_2);
     );
