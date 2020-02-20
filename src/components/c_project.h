@@ -60,7 +60,7 @@
     _BR("") \
     _BR("lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}") \
     _TR("${CC} -shared -Wl,-soname,$@ -o $@.$0 $^") \
-    _TR("ln -s $@.$0 $@") \
+    _TR("ln -sf $@.$0 $@") \
     _BR("") \
     _BR("install:") \
     _TR("@cp ${APP_NAME} ${CONFIG_INSTALL_PATH}/bin 2> /dev/null || :") \
@@ -105,9 +105,9 @@
     _BR("TESTS_OUT := ${TESTS_C:%.c=%.out}") \
     _BR("") \
     _BR("all: ${TESTS_OUT}") \
+    _TR("${MAKE} -C .. shared_library") \
     _BR("") \
     _BR("${TESTS_OUT}: %.out: %.c") \
-    _TR("${MAKE} -C .. shared_library") \
     _TR("${CC} $< -o $@ ${CFLAGS} ${LDFLAGS} -l${APP_NAME}") \
     _BR("") \
     _BR("clean:") \
