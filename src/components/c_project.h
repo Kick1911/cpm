@@ -142,18 +142,14 @@
 
 #define APP_CONFIGURE \
     _BR("#!/usr/bin/bash") \
-    _BR("export CONFIG_INSTALL_PATH=\"/usr/local/\"") \
+    _BR("export _CONFIG_INSTALL_PATH=\"/usr/local/\"") \
     _BR("") \
     _BR("for arg in \"$@\"; do") \
     _TR("if [[ $arg =~ --prefix=(.+) ]];then") \
-    _TR("\tCONFIG_INSTALL_PATH=\"${BASH_REMATCH[1]}\"") \
+    _TR("\t_CONFIG_INSTALL_PATH=\"${BASH_REMATCH[1]}\"") \
     _TR("fi") \
     _BR("done") \
     _BR("") \
-    _BR("echo '' > Makefile.in") \
-    _BR("for x in `env | grep \"^CONFIG_\"`; do") \
-    _TR("echo \"$x\" >> Makefile.in") \
-    _BR("done") \
     _BR("echo '' >> Makefile.in") \
     _BR("if [[ `command -v gcc` ]]; then") \
     _TR("echo 'gcc found'") \
@@ -163,6 +159,11 @@
     _TR("echo 'Compatible C compiler not found.'") \
     _TR("exit 1") \
     _BR("fi") \
+    _BR("") \
+    _BR("echo '' > Makefile.in") \
+    _BR("for x in `env | grep \"^_CONFIG_\"`; do") \
+    _TR("echo \"$x\" >> Makefile.in") \
+    _BR("done") \
     _BR("")
 
 #endif
