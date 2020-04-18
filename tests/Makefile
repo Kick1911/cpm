@@ -1,5 +1,6 @@
 ROOT = ..
 include ../project.mk
+include ../Makefile.in
 include ../config.mk
 
 TESTS_OUT := ${TESTS_C:%.c=%.out}
