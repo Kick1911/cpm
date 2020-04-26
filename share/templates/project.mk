@@ -1,0 +1,2 @@
+APP_NAME = $0
+VERSION = 0.0.1

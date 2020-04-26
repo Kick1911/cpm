@@ -26,12 +26,12 @@ char* x_str(const char* s, size_t l){
     return b;
 }
 
-int make_dir(dir_path_t* d, __mode_t mode){
+int make_dir(const char* d, __mode_t mode){
     char buffer[PATH_MAX*2] = {0};
     struct stat st = {0};
 
     strcat(buffer, "./");
-    strcat(buffer, d->path);
+    strcat(buffer, d);
 
     if (stat(buffer, &st) == -1){
         if(mkdir(buffer, mode))
@@ -41,28 +41,23 @@ int make_dir(dir_path_t* d, __mode_t mode){
 
     return 0;
     error:
-        fprintf(stderr, "Error creating directory: %s\n", d->path);
+        fprintf(stderr, "Error creating directory: %s\n", d);
         return 1;
 }
 
-int make_file(dir_path_t* d, char* name, __mode_t mode, char* data){
+int make_file(const char* name, __mode_t mode, char* data){
     FILE* fp;
-    char buffer[PATH_MAX*2] = {0};
 
-    xstrcpy(d->end, name);
-    strcat(buffer, "./");
-    strcat(buffer, d->path);
-
-    fp = fopen(buffer, "a");
+    fp = fopen(name, "w");
     if(!fp) {
-        fprintf(stderr, "Error creating file: %s\n", d->path);
+        fprintf(stderr, "Error creating file: %s\n", name);
         goto close_file_and_error;
     }
     if(data)
         fwrite(data, sizeof(char), strlen(data), fp);
 
     fclose(fp);
-    chmod(buffer, mode);
+    chmod(name, mode);
     return 0;
     close_file_and_error:
         fclose(fp);

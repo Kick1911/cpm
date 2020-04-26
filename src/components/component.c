@@ -2,13 +2,12 @@
 #include <cpm_apps.h>
 #include <stdio.h>
 #include <malloc.h>
-#include <components/c_project.h>
 #include <utils/util.h>
 #include <utils/render.h>
 #include <ctype.h>
 
 CPM_APP_FUNCTION(component){
-    dir_path_t src, comp;
+    /* dir_path_t src, comp;
 
     src.end = xstrcpy(src.path, _SRC);
 
@@ -34,6 +33,6 @@ CPM_APP_FUNCTION(component){
         WITH(render(COMP_H, header_args, 1), comp_h,
             make_file(&comp, comp_h_filename, FILE_PERMISSIONS, comp_h);
         );
-    );
+    ); */
     return 0;
 }

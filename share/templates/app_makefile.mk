@@ -5,15 +5,15 @@ include config.mk
 all: ${APP_NAME}
 
 ${APP_NAME}: ${SRC_PATH}/${APP_NAME}.c ${COMP_O} ${UTILS_O}
-	${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
+	${CC} $^ -o $@ ${CFLAGS}
+
 %.o: %.c
 	${CC} -c $< -o $@ ${CFLAGS} -D STATIC
 
 static_library: lib${APP_NAME}.a
 
 lib${APP_NAME}.a: ${COMP_O} ${UTILS_O}
-	ar -cvq $@ $^
-
+	ar -cvq $@ $^ ${shell find lib -name '*.o'}
 
 set_pic:
 	${eval CFLAGS += -fPIC}
@@ -21,8 +21,8 @@ set_pic:
 shared_library: set_pic lib${APP_NAME}.so
 
 lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
-	${CC} -shared -Wl,-soname,$@ -o $@.0.0.1 $^ ${LDFLAGS}
-	ln -sf $@.0.0.1 $@
+	${CC} -shared -Wl,-soname,$@ -o $@.${VERSION} $^ ${shell find lib -name '*.o'}
+	ln -sf $@.${VERSION} $@
 
 install:
 	@cp ${APP_NAME} ${CONFIG_INSTALL_PATH}/bin 2> /dev/null || :
@@ -31,8 +31,6 @@ install:
 
 clean:
 	${RM} ${APP_NAME} lib${APP_NAME}.*
-	${MAKE} -C tests clean
-	${MAKE} -C src clean
 
+.INTERMEDIATE: ${COMP_O} ${UTILS_O}
 .PHONY: install clean all set_pic
-

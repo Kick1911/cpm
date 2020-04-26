@@ -16,7 +16,7 @@ const cpm_app_t cpm_apps[] = {
     {NULL, NULL}
 };
 
-int main(int argc, char** argv){
+int main(int argc, const char** argv){
     char current_dir[PATH_MAX];
     const cpm_app_t* ptr = cpm_apps;
     cpm_context_t context;

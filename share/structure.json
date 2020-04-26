@@ -1,0 +1,22 @@
+{
+    "$0": {
+        "configure": "app_configure.sh",
+        "Makefile": "app_makefile.mk",
+        "Makefile.in": "app_makefile.in.mk",
+        "project.mk": "project.mk",
+        "config.mk": "config.mk",
+        "lib": {},
+        "tests": {
+            "Makefile": "tests_makefile.mk",
+            "test_utils.c": "test_utils.c"
+        },
+        "src":{
+            "components": {},
+            "utils": {
+                "utils.c": "utils_utils.c",
+                "utils.h": "utils_utils.h"
+            },
+            "$0.c": "app.c"
+        }
+    }
+}

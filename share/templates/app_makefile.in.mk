@@ -1,0 +1,1 @@
+CONFIG_INSTALL_PATH=/opt

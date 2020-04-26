@@ -15,18 +15,11 @@
         free(as); \
     }
 
-typedef struct dir_path dir_path_t;
-
-struct dir_path {
-    char path[PATH_MAX*2];
-    char* end;
-};
-
 int number_of_digits(int);
 char* xstrcpy(char* dest, const char* src);
 char* xstrncpy(char* dest, const char* src, long int);
 char* x_str(const char*, unsigned long);
-int make_file(dir_path_t*, char*, __mode_t, char*);
-int make_dir(dir_path_t*, __mode_t);
+int make_file(const char*, __mode_t, char*);
+int make_dir(const char*, __mode_t);
 
 #endif
