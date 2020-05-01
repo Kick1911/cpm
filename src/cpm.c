@@ -1,24 +1,31 @@
-#include <cpm.h>
-#include <cpm_apps.h>
-#include <cpm_types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <linux/limits.h>
 
-CPM_APP_FUNCTION(init);
-CPM_APP_FUNCTION(component);
+#include <cpm.h>
+#include <cpm_apps.h>
+#include <components/components.h>
 
-const cpm_app_t cpm_apps[] = {
-    CPM_REGISTER_APP(init),
-    CPM_REGISTER_APP(component),
-    {NULL, NULL}
-};
+int run_app(const char* app_name,
+            cpm_context_t* context,
+            const char** args){
+    const cpm_app_t* ptr = cpm_apps;
+
+    while(ptr->name){
+        if(!strcmp(app_name, ptr->name)){
+            ptr->func(context, args + 2);
+            return 0;
+        }
+        ptr++;
+    }
+    fprintf(stderr, "Command '%s' not found\n", app_name);
+    return 1;
+}
 
 int main(int argc, const char** argv){
     char current_dir[PATH_MAX];
-    const cpm_app_t* ptr = cpm_apps;
     cpm_context_t context;
 
     if(!getcwd(current_dir, sizeof(current_dir))){
@@ -27,14 +34,5 @@ int main(int argc, const char** argv){
     }
 
     context.current_dir = current_dir;
-
-    while(ptr->name){
-        if(!strcmp(argv[1], ptr->name)){
-            ptr->func(&context, argv + 2);
-            return 0;
-        }
-        ptr++;
-    }
-    fprintf(stderr, "Command '%s' not found\n", argv[1]);
-    return 1;
+    return run_app(argv[1], &context, argv);
 }

@@ -63,3 +63,19 @@ int make_file(const char* name, __mode_t mode, char* data){
         fclose(fp);
         return 1;
 }
+
+char* read_file(const char* path){
+    long size = 0;
+    char* text;
+    FILE* f = fopen(path, "r");
+
+    fseek(f, 0, SEEK_END);
+    size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    text = (char*)malloc(sizeof(char) * (size+1));
+    fread(text, sizeof(char), size, f);
+    text[size] = 0;
+    fclose(f);
+
+    return text;
+}

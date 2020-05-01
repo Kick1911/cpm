@@ -1,6 +1,9 @@
 #ifndef _CPM_TYPES_H
-#include <cpm.h>
 #define _CPM_TYPES_H
+
+typedef struct {
+    char* current_dir;
+} cpm_context_t;
 
 typedef struct {
     char* name;
