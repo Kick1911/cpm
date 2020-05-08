@@ -3,44 +3,30 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <malloc.h>
 #include <utils/util.h>
 #include <utils/render.h>
-#include <json.h>
+#include <components/init.h>
 
 #define FILE_PERMISSIONS 0644
 #define DIR_PERMISSIONS 0700
 
-static char* read_file(const char* path){
-    long size = 0;
-    char* text;
-    FILE* f = fopen(path, "r");
-
-    fseek(f, 0, SEEK_END);
-    size = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    text = (char*)malloc(sizeof(char) * (size+1));
-    fread(text, sizeof(char), size, f);
-    text[size] = 0;
-    fclose(f);
-
-    return text;
-}
-
-static int read_structure(json_t* json, char* root, const char** args, size_t arg_len){
+int fill_project(json_t* json, char* p, const char** args, size_t arg_len){
     char* key = NULL, path[PATH_MAX];
     void* value = NULL, *jloop = NULL;
+    size_t path_len = strlen(p);
 
-    root = xstrcpy(path, root);
+    xstrcpy(path, p);
     jloop = json_iter(json);
     while( !json_next(jloop, &key, &value) ){
-        sprintf(root, "/%s", key);
+        sprintf(path + path_len, "/%s", key);
         switch(json_type(value)){
             case JSON_OBJECT:
                 WITH(render(path, args, arg_len), filepath,
                     make_dir(filepath, DIR_PERMISSIONS);
                 );
-                read_structure(json_data(value), path, args, arg_len);
+                fill_project(json_data(value), path, args, arg_len);
             break;
             case JSON_STRING:
                 WITH(render(path, args, arg_len), filepath,
@@ -65,14 +51,25 @@ static int read_structure(json_t* json, char* root, const char** args, size_t ar
     return 0;
 }
 
+static int create_project(json_t* json, const char* root, const char** args, size_t arg_len){
+    char path[PATH_MAX];
+
+    xstrcpy(path, root);
+    /* Create project root */
+    WITH(render(path, args, arg_len), filepath,
+        make_dir(filepath, DIR_PERMISSIONS);
+    );
+    fill_project(json, path, args, arg_len);
+    return 0;
+}
+
 CPM_APP_FUNCTION(init){
     void* json;
-    char dir_structure[PATH_MAX];
-    const char* version[] = {"0.0.1"};
+    char path_structure[PATH_MAX];
 
-    sprintf(dir_structure, "%s/structure.json", getenv("CPM_SHARE_DIR"));
-    json = json_parse_file(dir_structure);
-    read_structure(json, ".", args, 1);
+    sprintf(path_structure, "%s/structure.json", getenv("CPM_SHARE_DIR"));
+    json = json_parse_file(path_structure);
+    create_project(json, *args, args, 1);
     json_free(json);
     return 0;
 }

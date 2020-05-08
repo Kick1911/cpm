@@ -5,7 +5,7 @@ include config.mk
 all: ${APP_NAME}
 
 ${APP_NAME}: ${SRC_PATH}/${APP_NAME}.c ${COMP_O} ${UTILS_O}
-	${CC} $^ -o $@ ${CFLAGS}
+	${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
 
 %.o: %.c
 	${CC} -c $< -o $@ ${CFLAGS} -D STATIC
@@ -21,16 +21,17 @@ set_pic:
 shared_library: set_pic lib${APP_NAME}.so
 
 lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
-	${CC} -shared -Wl,-soname,$@ -o $@.${VERSION} $^ ${shell find lib -name '*.o'}
+	${CC} -shared -Wl,-soname,$@ -o $@.${VERSION} $^ ${LDFLAGS} ${shell find lib -name '*.o'}
 	ln -sf $@.${VERSION} $@
 
 install:
+	@mkdir -p ${CONFIG_INSTALL_PATH}/{bin,share/${APP_NAME},include,lib}
 	@cp ${APP_NAME} ${CONFIG_INSTALL_PATH}/bin 2> /dev/null || :
 	@cp ${INCLUDE_PATH}/* ${CONFIG_INSTALL_PATH}/include 2> /dev/null || :
 	@cp lib${APP_NAME}.* ${CONFIG_INSTALL_PATH}/lib 2> /dev/null || :
+	@cp -R ${SHARE_PATH}/* ${CONFIG_INSTALL_PATH}/share/${APP_NAME} 2> /dev/null || :
 
 clean:
-	${RM} ${APP_NAME} lib${APP_NAME}.*
+	${RM} ${APP_NAME} lib${APP_NAME}.* ${COMP_O} ${UTILS_O}
 
-.INTERMEDIATE: ${COMP_O} ${UTILS_O}
 .PHONY: install clean all set_pic

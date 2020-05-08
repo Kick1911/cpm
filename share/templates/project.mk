@@ -1,2 +1,3 @@
-APP_NAME = $0
-VERSION = 0.0.1
+CPM = cpm
+APP_NAME = ${shell ${CPM} json name}
+VERSION = ${shell ${CPM} json version}
