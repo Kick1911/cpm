@@ -1,5 +1,4 @@
 include project.mk
-include Makefile.in
 include config.mk
 
 all: ${APP_NAME}

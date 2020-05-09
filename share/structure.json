@@ -1,7 +1,5 @@
 {
-    "configure": "app_configure.sh",
     "Makefile": "app_makefile.mk",
-    "Makefile.in": "app_makefile.in.mk",
     "project.mk": "project.mk",
     "project.json": "project.json",
     "config.mk": "config.mk",

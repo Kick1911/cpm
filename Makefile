@@ -1,5 +1,4 @@
 include project.mk
-include Makefile.in
 include config.mk
 
 all: ${APP_NAME}
@@ -21,7 +20,7 @@ set_pic:
 shared_library: set_pic lib${APP_NAME}.so
 
 lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
-	${CC} -shared -Wl,-soname,$@ -o $@.${VERSION} $^ ${shell find lib -name '*.o'}
+	${CC} -shared -Wl,-soname,$@ -o $@.${VERSION} $^ ${LDFLAGS} ${shell find lib -name '*.o'}
 	ln -sf $@.${VERSION} $@
 
 install:
