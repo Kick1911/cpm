@@ -16,3 +16,13 @@ UTILS_O = ${UTILS_C:%.c=%.o}
 LDFLAGS += -L${ROOT}
 
 CFLAGS += ${DEBUG} -ansi -pedantic -Wall -Wno-deprecated-declarations -I${SRC_PATH} -I${INCLUDE_PATH}
+
+ifneq ($(V),1)
+Q := @
+# Do not print "Entering directory ...".
+MAKEFLAGS += --no-print-directory
+endif
+
+define print
+	@echo '  ${1}'
+endef
