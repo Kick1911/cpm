@@ -3,6 +3,8 @@
 
 #include <cpm_types.h>
 
+char* CPM_SHARE_DIR;
+
 int run_app(const char*, cpm_context_t*, const char**);
 
 #endif

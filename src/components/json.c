@@ -13,12 +13,7 @@ CPM_APP_FUNCTION(json){
     }
 
     value = json_data(json_get(project, *args));
-    if(value)
-        printf("%s\n", value);
-    else{
-        fprintf(stderr, "Key is not found in project.json\n");
-        goto close;
-    }
+    printf("%s\n", (value ? value: ""));
     
     close:
         json_free(project);

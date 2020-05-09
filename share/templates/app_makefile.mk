@@ -7,7 +7,7 @@ ${APP_NAME}: ${SRC_PATH}/${APP_NAME}.c ${COMP_O} ${UTILS_O}
 	${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
 
 %.o: %.c
-	${CC} -c $< -o $@ ${CFLAGS} -D STATIC
+	${CC} -c $< -o $@ ${CFLAGS}
 
 static_library: lib${APP_NAME}.a
 
@@ -24,11 +24,11 @@ lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
 	ln -sf $@.${VERSION} $@
 
 install:
-	@mkdir -p ${CONFIG_INSTALL_PATH}/{bin,share/${APP_NAME},include,lib}
-	@cp ${APP_NAME} ${CONFIG_INSTALL_PATH}/bin 2> /dev/null || :
-	@cp ${INCLUDE_PATH}/* ${CONFIG_INSTALL_PATH}/include 2> /dev/null || :
-	@cp lib${APP_NAME}.* ${CONFIG_INSTALL_PATH}/lib 2> /dev/null || :
-	@cp -R ${SHARE_PATH}/* ${CONFIG_INSTALL_PATH}/share/${APP_NAME} 2> /dev/null || :
+	@mkdir -p ${INSTALL_PATH}/{bin,share/${APP_NAME},include,lib}
+	@cp ${APP_NAME} ${INSTALL_PATH}/bin 2> /dev/null || :
+	@cp ${INCLUDE_PATH}/* ${INSTALL_PATH}/include 2> /dev/null || :
+	@cp lib${APP_NAME}.* ${INSTALL_PATH}/lib 2> /dev/null || :
+	@cp -R ${SHARE_PATH}/* ${INSTALL_PATH}/share/${APP_NAME} 2> /dev/null || :
 
 clean:
 	${RM} ${APP_NAME} lib${APP_NAME}.* ${COMP_O} ${UTILS_O}

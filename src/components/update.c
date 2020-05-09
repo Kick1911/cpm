@@ -6,23 +6,35 @@
 #include <linux/limits.h>
 
 CPM_APP_FUNCTION(update){
-    void* structure, *project;
+    void* structure = NULL, *project = NULL;
     char path_structure[PATH_MAX];
     const char* argv[1];
+    const char* exclude[] = {"c", "h", "json", NULL};
 
-    sprintf(path_structure, "%s/structure.json", getenv("CPM_SHARE_DIR"));
+    sprintf(path_structure, "%s/structure.json", CPM_SHARE_DIR);
     structure = json_parse_file(path_structure);
+    if(!structure){
+        fprintf(stderr, "File '%s' not found\n", path_structure);
+        goto error;
+    }
     project = json_parse_file("project.json");
+    if(!project){
+        fprintf(stderr, "File 'project.json' not found\n");
+        goto error;
+    }
 
     *argv = json_data(json_get(project, "name"));
     if(!*argv){
         fprintf(stderr, "`name` not found in project.json\n");
-        goto close;
+        goto error;
     }
-    fill_project(structure, ".", argv, 1);
+    fill_project(structure, ".", argv, 1, exclude);
 
-    close:
-        json_free(structure);
-        json_free(project);
-        return 0;
+    json_free(structure);
+    json_free(project);
+    return 0;
+    error:
+    json_free(structure);
+    json_free(project);
+    return 1;
 }
