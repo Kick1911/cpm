@@ -28,6 +28,22 @@ lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
 	${call print,'SYMLINK $@'}
 	${Q}ln -sf $@.${VERSION} $@
 
+dep: ${DEPENDENCIES:%=${LIB_PATH}/lib%.a}
+
+${LIB_PATH}/%.a:
+	${eval LIB_NAME = ${notdir $@}}
+	${eval PROJECT_NAME = ${LIB_NAME:lib%.a=%}}
+	${call download,${PROJECT_NAME},${LIB_NAME}}
+
+register_app:
+	${call mkdir,${APP_NAME}}
+
+upload_shared: set_pic lib${APP_NAME}.so
+	${call upload,${APP_NAME},${filter %.so,$^}.${VERSION}}
+
+upload_static: lib${APP_NAME}.a
+	${call upload,${APP_NAME},$<}
+
 install:
 	${call print,INSTALL ${INSTALL_PATH}}
 	${Q}mkdir -p ${INSTALL_PATH}/{bin,share/${APP_NAME},include,lib}
