@@ -2,6 +2,6 @@
     "name": "cpm",
     "version": "0.0.1",
     "install_path": "/opt",
-    "dependencies": "json",
+    "dependencies": "libjson.so.0.0.1",
     "cflags": "-DINSTALL_PATH=${INSTALL_PATH}"
 }

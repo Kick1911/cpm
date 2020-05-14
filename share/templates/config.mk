@@ -31,7 +31,7 @@ endef
 define download
 curl 'https://app.smartfile.com/api/2/path/data/${1}/${2}' \
 	-H 'Authorization: Basic bFFoUVk0ek10SzRQbk11WjBYUjdFenQyOW9pSWZEOm9WclcxcWJDNlA4OWQyZjBuRTVrUElYaHczTGRvcQ==' \
-	-O ${LIB_PATH}/${2}
+	-o ${3}/${2}
 endef
 
 define upload

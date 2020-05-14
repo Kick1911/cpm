@@ -1,7 +1,7 @@
 include project.mk
 include config.mk
 
-all: ${APP_NAME}
+all: dep ${APP_NAME}
 
 ${APP_NAME}: ${SRC_PATH}/${APP_NAME}.c ${COMP_O} ${UTILS_O}
 	${call print,BIN $@}
@@ -28,21 +28,24 @@ lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
 	${call print,'SYMLINK $@'}
 	${Q}ln -sf $@.${VERSION} $@
 
-dep: ${DEPENDENCIES:%=${LIB_PATH}/lib%.a}
+dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
 
-${LIB_PATH}/%.a:
+${LIB_PATH}/%:
 	${eval LIB_NAME = ${notdir $@}}
-	${eval PROJECT_NAME = ${LIB_NAME:lib%.a=%}}
-	${call download,${PROJECT_NAME},${LIB_NAME}}
+	${eval PROJECT_NAME = ${shell echo ${LIB_NAME} | awk -v RS=' ' 'match($$0, "lib(.+).(a|so).[0-9].[0-9].[0-9]", a) {print a[1]}'}}
+	${call download,${PROJECT_NAME},${LIB_NAME},${LIB_PATH}}
+	${call download,${PROJECT_NAME},${PROJECT_NAME}.h,${INCLUDE_PATH}}
 
 register_app:
 	${call mkdir,${APP_NAME}}
 
 upload_shared: set_pic lib${APP_NAME}.so
 	${call upload,${APP_NAME},${filter %.so,$^}.${VERSION}}
+	${call upload,${APP_NAME},${INCLUDE_PATH}/${APP_NAME}.h}
 
 upload_static: lib${APP_NAME}.a
 	${call upload,${APP_NAME},$<}
+	${call upload,${APP_NAME},${INCLUDE_PATH}/${APP_NAME}.h}
 
 install:
 	${call print,INSTALL ${INSTALL_PATH}}
