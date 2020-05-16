@@ -3,7 +3,7 @@ include config.mk
 
 all: dep ${APP_NAME}
 
-${APP_NAME}: ${SRC_PATH}/${APP_NAME}.c ${COMP_O} ${UTILS_O}
+${APP_NAME}: ${SRC_PATH}/${APP_NAME}.o ${COMP_O} ${UTILS_O}
 	${call print,BIN $@}
 	${Q}${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
 
@@ -11,11 +11,12 @@ ${APP_NAME}: ${SRC_PATH}/${APP_NAME}.c ${COMP_O} ${UTILS_O}
 	${call print,CC $< -> $@}
 	${Q}${CC} -c $< -o $@ ${CFLAGS}
 
-static_library: lib${APP_NAME}.a
+static_library: lib${APP_NAME}.a.${VERSION}
 
-lib${APP_NAME}.a: ${COMP_O} ${UTILS_O}
+lib${APP_NAME}.a.${VERSION}: ${COMP_O} ${UTILS_O}
 	${call print,AR $@}
-	${Q}ar -cvq $@ $^ ${shell find lib -name '*.o'}
+	${Q}cd ${LIB_PATH}; ar -x *.a.[0-9].[0-9].[0-9]
+	${Q}ar -cq $@ $^ ${shell find ${LIB_PATH} -name '*.o'}
 
 set_pic:
 	${eval CFLAGS += -fPIC}
@@ -31,10 +32,12 @@ lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
 dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
 
 ${LIB_PATH}/%:
-	${eval LIB_NAME = ${notdir $@}}
-	${eval PROJECT_NAME = ${shell echo ${LIB_NAME} | awk -v RS=' ' 'match($$0, "lib(.+).(a|so).[0-9].[0-9].[0-9]", a) {print a[1]}'}}
+	${eval LIB_NAME = ${@F}}
+	${eval NO_VERSION = ${shell echo ${LIB_NAME} | awk -v RS=' ' 'match($$$#0, "(.+).[0-9].[0-9].[0-9]", a) {print a[1]}'}}
+	${eval PROJECT_NAME = ${basename ${NO_VERSION:lib%=%}}}
 	${call download,${PROJECT_NAME},${LIB_NAME},${LIB_PATH}}
 	${call download,${PROJECT_NAME},${PROJECT_NAME}.h,${INCLUDE_PATH}}
+	${Q}ln -sf ${LIB_NAME} ${LIB_PATH}/${NO_VERSION}
 
 register_app:
 	${call mkdir,${APP_NAME}}
@@ -43,7 +46,7 @@ upload_shared: set_pic lib${APP_NAME}.so
 	${call upload,${APP_NAME},${filter %.so,$^}.${VERSION}}
 	${call upload,${APP_NAME},${INCLUDE_PATH}/${APP_NAME}.h}
 
-upload_static: lib${APP_NAME}.a
+upload_static: lib${APP_NAME}.a.${VERSION}
 	${call upload,${APP_NAME},$<}
 	${call upload,${APP_NAME},${INCLUDE_PATH}/${APP_NAME}.h}
 

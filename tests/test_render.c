@@ -1,5 +1,4 @@
 #include <utils/render.h>
-#include <components/c_project.h>
 #include <unitest.h>
 #include <stdio.h>
 #include <malloc.h>
@@ -14,10 +13,10 @@ int main(void){
         free(res);
     );
     TEST(Rendering mid,
-        char template[] = "<a href=\"$0\">$1Blah$#</a>";
+        char template[] = "<a href=\"$0\">$1Blah$$#0</a>";
         char* args[] = {"/kick"};
         char* res = render(template, (const char**)args, sizeof(args)/sizeof(char*));
-        T_ASSERT_STRING(res, "<a href=\"/kick\">(null)Blah$#</a>");
+        T_ASSERT_STRING(res, "<a href=\"/kick\">(null)Blah$0</a>");
         free(res);
     );
     TEST(Rendering end,

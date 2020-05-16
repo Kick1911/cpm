@@ -14,7 +14,7 @@ TESTS_C = ${shell find ${TESTS_PATH} -name '*.c'}
 COMP_O = ${COMP_C:%.c=%.o}
 UTILS_O = ${UTILS_C:%.c=%.o}
 
-LDFLAGS += -L${ROOT}
+LDFLAGS += -L${ROOT} -L${LIB_PATH}
 
 CFLAGS += ${DEBUG} -ansi -pedantic -Wall -Wno-deprecated-declarations -I${SRC_PATH} -I${INCLUDE_PATH}
 

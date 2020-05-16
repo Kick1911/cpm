@@ -21,7 +21,8 @@ char* render(const char* template, const char** args, size_t args_l){
             else
                 post_length += strlen(NULL_STR);
             post_length -= (1 + number_of_digits(i));
-        }
+        } else if(!strncmp(start, "$#", 2))
+            post_length -= 2;
         start++;
     }
 
@@ -37,6 +38,8 @@ char* render(const char* template, const char** args, size_t args_l){
                             (i < args_l)?
                                     args[i]: NULL_STR);
             end += number_of_digits(i);
+        } else if(!strncmp(end, "$#", 2)){
+            post_ptr--; end++;
         }
         start = end + 1;
     }
