@@ -42,21 +42,27 @@ ${LIB_PATH}/%:
 register_app:
 	${call mkdir,${APP_NAME}}
 
-upload_shared: set_pic lib${APP_NAME}.so
-	${call upload,${APP_NAME},${filter %.so,$^}.${VERSION}}
-	${call upload,${APP_NAME},${INCLUDE_PATH}/${APP_NAME}.h}
-
 upload_static: lib${APP_NAME}.a.${VERSION}
 	${call upload,${APP_NAME},$<}
 	${call upload,${APP_NAME},${INCLUDE_PATH}/${APP_NAME}.h}
 
-install:
+install_binary:
 	${call print,INSTALL ${INSTALL_PATH}}
-	${Q}mkdir -p ${INSTALL_PATH}/{bin,share/${APP_NAME},include,lib}
-	${Q}cp ${APP_NAME} ${INSTALL_PATH}/bin 2> /dev/null || :
-	${Q}cp ${INCLUDE_PATH}/* ${INSTALL_PATH}/include 2> /dev/null || :
-	${Q}cp lib${APP_NAME}.* ${INSTALL_PATH}/lib 2> /dev/null || :
-	${Q}cp -R ${SHARE_PATH}/* ${INSTALL_PATH}/share/${APP_NAME} 2> /dev/null || :
+	${Q}cp ${APP_NAME} ${INSTALL_PATH}/bin
+
+install_static: ${SRC_PATH}/${APP_NAME}.h lib${APP_NAME}.a.${VERSION}
+	${call print,INSTALL ${INSTALL_PATH}}
+	${Q}cp ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include
+	${Q}cp lib${APP_NAME}.a.${VERSION} ${INSTALL_PATH}/lib
+
+install_shared: ${SRC_PATH}/${APP_NAME}.h lib${APP_NAME}.so.${VERSION}
+	${call print,INSTALL ${INSTALL_PATH}}
+	${Q}cp ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include
+	${Q}cp lib${APP_NAME}.so.${VERSION} ${INSTALL_PATH}/lib
+
+install_share_folder:
+	${call print,INSTALL ${INSTALL_PATH}}
+	${Q}cp -R ${SHARE_PATH}/* ${INSTALL_PATH}/share/${APP_NAME}
 
 clean:
 	${call print,CLEAN ${APP_NAME}}
