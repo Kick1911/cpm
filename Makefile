@@ -1,9 +1,9 @@
 include project.mk
 include config.mk
 
-all: ${APP_NAME}
+all: dep ${APP_NAME}
 
-${APP_NAME}: ${SRC_PATH}/${APP_NAME}.c ${COMP_O} ${UTILS_O}
+${APP_NAME}: ${SRC_PATH}/${APP_NAME}.o ${COMP_O} ${UTILS_O}
 	${call print,BIN $@}
 	${Q}${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
 
@@ -11,11 +11,12 @@ ${APP_NAME}: ${SRC_PATH}/${APP_NAME}.c ${COMP_O} ${UTILS_O}
 	${call print,CC $< -> $@}
 	${Q}${CC} -c $< -o $@ ${CFLAGS}
 
-static_library: lib${APP_NAME}.a
+static_library: lib${APP_NAME}.a.${VERSION}
 
-lib${APP_NAME}.a: ${COMP_O} ${UTILS_O}
+lib${APP_NAME}.a.${VERSION}: ${COMP_O} ${UTILS_O}
 	${call print,AR $@}
-	${Q}ar -cvq $@ $^ ${shell find lib -name '*.o'}
+	${Q}cd ${LIB_PATH}; ar -x *.a.[0-9].[0-9].[0-9]
+	${Q}ar -cq $@ $^ ${shell find ${LIB_PATH} -name '*.o'}
 
 set_pic:
 	${eval CFLAGS += -fPIC}
@@ -28,13 +29,40 @@ lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
 	${call print,'SYMLINK $@'}
 	${Q}ln -sf $@.${VERSION} $@
 
-install:
+dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
+
+${LIB_PATH}/%:
+	${eval LIB_NAME = ${@F}}
+	${eval NO_VERSION = ${shell echo ${LIB_NAME} | awk -v RS=' ' 'match($$0, "(.+).[0-9].[0-9].[0-9]", a) {print a[1]}'}}
+	${eval PROJECT_NAME = ${basename ${NO_VERSION:lib%=%}}}
+	${call download,${PROJECT_NAME},${LIB_NAME},${LIB_PATH}}
+	${call download,${PROJECT_NAME},${PROJECT_NAME}.h,${INCLUDE_PATH}}
+	${Q}ln -sf ${LIB_NAME} ${LIB_PATH}/${NO_VERSION}
+
+register_app:
+	${call mkdir,${APP_NAME}}
+
+upload_static: lib${APP_NAME}.a.${VERSION}
+	${call upload,${APP_NAME},$<}
+	${call upload,${APP_NAME},${INCLUDE_PATH}/${APP_NAME}.h}
+
+install_binary:
 	${call print,INSTALL ${INSTALL_PATH}}
-	${Q}mkdir -p ${INSTALL_PATH}/{bin,share/${APP_NAME},include,lib}
-	${Q}cp ${APP_NAME} ${INSTALL_PATH}/bin 2> /dev/null || :
-	${Q}cp ${INCLUDE_PATH}/* ${INSTALL_PATH}/include 2> /dev/null || :
-	${Q}cp lib${APP_NAME}.* ${INSTALL_PATH}/lib 2> /dev/null || :
-	${Q}cp -R ${SHARE_PATH}/* ${INSTALL_PATH}/share/${APP_NAME} 2> /dev/null || :
+	${Q}cp ${APP_NAME} ${INSTALL_PATH}/bin
+
+install_static: ${SRC_PATH}/${APP_NAME}.h lib${APP_NAME}.a.${VERSION}
+	${call print,INSTALL ${INSTALL_PATH}}
+	${Q}cp ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include
+	${Q}cp lib${APP_NAME}.a.${VERSION} ${INSTALL_PATH}/lib
+
+install_shared: ${SRC_PATH}/${APP_NAME}.h lib${APP_NAME}.so.${VERSION}
+	${call print,INSTALL ${INSTALL_PATH}}
+	${Q}cp ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include
+	${Q}cp lib${APP_NAME}.so.${VERSION} ${INSTALL_PATH}/lib
+
+install_share_folder:
+	${call print,INSTALL ${INSTALL_PATH}}
+	${Q}cp -R ${SHARE_PATH}/* ${INSTALL_PATH}/share/${APP_NAME}
 
 clean:
 	${call print,CLEAN ${APP_NAME}}
