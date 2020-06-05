@@ -1,5 +1,5 @@
-include project.mk
 include config.mk
+include project.mk
 
 all: dep ${APP_NAME}
 
@@ -25,7 +25,7 @@ shared_library: set_pic lib${APP_NAME}.so
 
 lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
 	${call print,LIB $@.${VERSION}}
-	${Q}${CC} -shared -Wl,-soname,$@ -o $@.${VERSION} $^ ${LDFLAGS} ${shell find lib -name '*.o'}
+	${Q}${CC} -shared -Wl,-soname,$@ -o $@.${VERSION} $^ ${LDFLAGS}
 	${call print,'SYMLINK $@'}
 	${Q}ln -sf $@.${VERSION} $@
 
@@ -67,6 +67,6 @@ install_share_folder:
 clean:
 	${call print,CLEAN ${APP_NAME}}
 	${Q}${MAKE} -C tests clean
-	${Q}${RM} ${APP_NAME} lib${APP_NAME}.* ${COMP_O} ${UTILS_O}
+	${Q}${RM} ${APP_NAME} ${SRC_PATH}/${APP_NAME}.o lib${APP_NAME}.* ${COMP_O} ${UTILS_O}
 
 .PHONY: install clean all set_pic
