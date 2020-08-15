@@ -1,7 +1,6 @@
 {
     "Makefile": "app_makefile.mk",
     "project.mk": "project.mk",
-    "project.json": "project.json",
     "config.mk": "config.mk",
     "lib": {},
     "tests": {
