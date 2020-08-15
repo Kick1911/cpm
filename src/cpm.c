@@ -12,6 +12,8 @@
 #define XSTR(x) #x
 #define STR(x) XSTR(x)
 
+char* CPM_SHARE_DIR;
+
 int run_app(const char* app_name,
             cpm_context_t* context,
             const char** args){

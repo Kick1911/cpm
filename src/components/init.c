@@ -12,7 +12,7 @@
 #define FILE_PERMISSIONS 0644
 #define DIR_PERMISSIONS 0700
 
-int fill_project(json_t* json, char* p, const char** args, size_t arg_len, const char** ex){
+int fill_project(json_t* json, char* p, const char** args, size_t arg_len, const char** exclude){
     char* key = NULL, path[PATH_MAX];
     void* value = NULL, *jloop = NULL;
     size_t path_len = strlen(p);
@@ -26,15 +26,15 @@ int fill_project(json_t* json, char* p, const char** args, size_t arg_len, const
                 WITH(render(path, args, arg_len), filepath,
                     make_dir(filepath, DIR_PERMISSIONS);
                 );
-                fill_project(json_data(value), path, args, arg_len, ex);
+                fill_project(json_data(value), path, args, arg_len, exclude);
             break;
             case JSON_STRING:{
-                const char** exclude_ex_i = ex;
-                char* extension = strrchr(key, '.');
-                if(extension && extension[1])
-                    while(exclude_ex_i && *exclude_ex_i)
-                        if(!strcmp(extension + 1, *exclude_ex_i++))
-                            goto end_json_string;
+                char* flag = NULL;
+                const char** ex = exclude;
+                if(ex)
+                    while(*ex && !(flag = strstr(key, *ex++)));
+                if(flag)
+                    continue;
                 WITH(render(path, args, arg_len), filepath,
                     char* file;
                     char* text;
@@ -49,8 +49,6 @@ int fill_project(json_t* json, char* p, const char** args, size_t arg_len, const
                     );
                     free(text);
                 );
-                end_json_string:
-                do{}while(0);
             }break;
             default:
             break;
