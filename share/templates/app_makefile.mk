@@ -15,7 +15,6 @@ static_library: lib${APP_NAME}.a.${VERSION}
 
 lib${APP_NAME}.a.${VERSION}: ${COMP_O} ${UTILS_O}
 	${call print,AR $@}
-	${Q}cd ${LIB_PATH}; ar -x *.a.[0-9].[0-9].[0-9]
 	${Q}ar -cq $@ $^ ${shell find ${LIB_PATH} -name '*.o'}
 
 set_pic:
@@ -29,22 +28,12 @@ lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
 	${call print,'SYMLINK $@'}
 	${Q}ln -sf $@.${VERSION} $@
 
-dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
+dep: ${DEPENDENCIES}
 
-${LIB_PATH}/%:
-	${eval LIB_NAME = ${@F}}
-	${eval NO_VERSION = ${shell echo ${LIB_NAME} | awk -v RS=' ' 'match($$$#0, "(.+).[0-9].[0-9].[0-9]", a) {print a[1]}'}}
-	${eval PROJECT_NAME = ${basename ${NO_VERSION:lib%=%}}}
-	${call download,${PROJECT_NAME},${LIB_NAME},${LIB_PATH}}
-	${call download,${PROJECT_NAME},${PROJECT_NAME}.h,${INCLUDE_PATH}}
-	${Q}ln -sf ${LIB_NAME} ${LIB_PATH}/${NO_VERSION}
-
-register_app:
-	${call mkdir,${APP_NAME}}
-
-upload_static: lib${APP_NAME}.a.${VERSION}
-	${call upload,${APP_NAME},$<}
-	${call upload,${APP_NAME},${SRC_PATH}/${APP_NAME}.h}
+%.git:
+	${eval PROJECT_NAME = ${@F}}
+	cd ${LIB_PATH}/${PROJECT_NAME:%.git=%} && git pull || (cd ${LIB_PATH} && git clone $@)
+	LIB_PATH=${LIB_PATH} ${MAKE} -C ${LIB_PATH}/${PROJECT_NAME:%.git=%} dep
 
 install_binary:
 	${call print,INSTALL ${INSTALL_PATH}}
@@ -69,4 +58,4 @@ clean:
 	${Q}${MAKE} -C tests clean
 	${Q}${RM} ${APP_NAME} ${SRC_PATH}/${APP_NAME}.o lib${APP_NAME}.* ${COMP_O} ${UTILS_O}
 
-.PHONY: install clean all set_pic
+.PHONY: install clean all set_pic dep

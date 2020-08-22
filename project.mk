@@ -6,6 +6,6 @@ CFLAGS += -DINSTALL_PATH=${INSTALL_PATH}
 STATIC_DEP = json
 SHARED_DEP =
 
-DEPENDENCIES = libjson.a.0.0.1
+DEPENDENCIES = https\://github.com/Kick1911/json.git
 
 LDFLAGS += ${STATIC_DEP:%=-l%} ${SHARED_DEP:%=-l%}
