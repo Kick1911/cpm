@@ -46,27 +46,31 @@ upload_static: lib${APP_NAME}.a.${VERSION}
 	${call upload,${APP_NAME},$<}
 	${call upload,${APP_NAME},${SRC_PATH}/${APP_NAME}.h}
 
-install_binary:
-	${call print,INSTALL ${INSTALL_PATH}}
-	${Q}cp ${APP_NAME} ${INSTALL_PATH}/bin
+install_binary: ${INSTALL_PATH}/bin/
+	${call print,INSTALL $<}
+	${Q}cp ${APP_NAME} ${INSTALL_PATH}/bin/
 
-install_static: ${SRC_PATH}/${APP_NAME}.h lib${APP_NAME}.a.${VERSION}
-	${call print,INSTALL ${INSTALL_PATH}}
-	${Q}cp ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include
-	${Q}cp lib${APP_NAME}.a.${VERSION} ${INSTALL_PATH}/lib
+install_static: lib${APP_NAME}.a.${VERSION} ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include/ ${INSTALL_PATH}/lib/
+	${call print,INSTALL $<}
+	${Q}cp ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include/
+	${Q}cp lib${APP_NAME}.a.${VERSION} ${INSTALL_PATH}/lib/
 
-install_shared: ${SRC_PATH}/${APP_NAME}.h lib${APP_NAME}.so.${VERSION}
-	${call print,INSTALL ${INSTALL_PATH}}
-	${Q}cp ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include
-	${Q}cp lib${APP_NAME}.so.${VERSION} ${INSTALL_PATH}/lib
+install_shared: lib${APP_NAME}.so.${VERSION} ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include/ ${INSTALL_PATH}/lib/
+	${call print,INSTALL $<}
+	${Q}cp ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include/
+	${Q}cp lib${APP_NAME}.so.${VERSION} ${INSTALL_PATH}/lib/
 
-install_share_folder:
-	${call print,INSTALL ${INSTALL_PATH}}
+install_share_folder: ${INSTALL_PATH}/share/${APP_NAME}
+	${call print,INSTALL $<}
 	${Q}cp -R ${SHARE_PATH}/* ${INSTALL_PATH}/share/${APP_NAME}
+
+${INSTALL_PATH}/%:
+	${call print,MKDIR $@}
+	${Q}mkdir -p $@
 
 clean:
 	${call print,CLEAN ${APP_NAME}}
 	${Q}${MAKE} -C tests clean
 	${Q}${RM} ${APP_NAME} ${SRC_PATH}/${APP_NAME}.o lib${APP_NAME}.* ${COMP_O} ${UTILS_O}
 
-.PHONY: install clean all set_pic
+.PHONY: clean all set_pic install_share_folder install_shared install_binary install_static
