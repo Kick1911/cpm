@@ -33,7 +33,7 @@ dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
 
 ${LIB_PATH}/%:
 	${eval LIB_NAME = ${@F}}
-	${eval NO_VERSION = ${shell echo ${LIB_NAME} | awk -v RS=' ' 'match($$$#0, "(.+).[0-9].[0-9].[0-9]", a) {print a[1]}'}}
+	${eval NO_VERSION = ${shell echo ${LIB_NAME} | awk -v RS=' ' 'match($$#0, "(.+).[0-9].[0-9].[0-9]", a) {print a[1]}'}}
 	${eval PROJECT_NAME = ${basename ${NO_VERSION:lib%=%}}}
 	${call download,${PROJECT_NAME},${LIB_NAME},${LIB_PATH}}
 	${call download,${PROJECT_NAME},${PROJECT_NAME}.h,${INCLUDE_PATH}}
