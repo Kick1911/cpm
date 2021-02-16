@@ -13,9 +13,9 @@ ${APP_NAME}: ${SRC_PATH}/${APP_NAME}.o ${COMP_O} ${UTILS_O}
 
 static_library: lib${APP_NAME}.a.${VERSION}
 
-lib${APP_NAME}.a.${VERSION}: ${COMP_O} ${UTILS_O}
+lib${APP_NAME}.a: ${COMP_O} ${UTILS_O}
 	${call print,AR $@}
-	${Q}cd ${LIB_PATH}; ar -x *.a.[0-9].[0-9].[0-9]
+	${Q}cd ${LIB_PATH}; ar -x *.a || true
 	${Q}ar -cq $@ $^ ${shell find ${LIB_PATH} -name '*.o'}
 
 set_pic:
@@ -29,31 +29,34 @@ lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
 	${call print,'SYMLINK $@'}
 	${Q}ln -sf $@.${VERSION} $@
 
-dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
+dep: ${DEPENDENCIES:%=${LIB_PATH}/%.a}
 
 ${LIB_PATH}/%:
-	${eval LIB_NAME = ${@F}}
-	${eval NO_VERSION = ${shell echo ${LIB_NAME} | awk -v RS=' ' 'match($$#0, "(.+).[0-9].[0-9].[0-9]", a) {print a[1]}'}}
-	${eval PROJECT_NAME = ${basename ${NO_VERSION:lib%=%}}}
-	${call download,${PROJECT_NAME},${LIB_NAME},${LIB_PATH}}
-	${call download,${PROJECT_NAME},${PROJECT_NAME}.h,${INCLUDE_PATH}}
-	${Q}ln -sf ${LIB_NAME} ${LIB_PATH}/${NO_VERSION}
+	${eval LIB_NAME = ${basename ${notdir $@}}}
+	${eval A = ${dir ${@:${LIB_PATH}/%=%}}}
+	${eval PACKAGE_NAME = ${subst /,,${A:lib/%=%}}}
+	${eval PACKAGE_VERSION = ${notdir ${LIB_NAME}}}
+
+	${Q}mkdir -p ${LIB_PATH}/${PACKAGE_NAME}
+	${call download,${PACKAGE_NAME}/${PACKAGE_VERSION}/lib${PACKAGE_NAME}.a,${LIB_PATH}/${PACKAGE_NAME}/${PACKAGE_VERSION}.a}
+	${call download,${PACKAGE_NAME}/${PACKAGE_VERSION}/${PACKAGE_NAME}.h,${INCLUDE_PATH}/${PACKAGE_VERSION}.h}
+	${Q}ln -sf ${shell pwd}/${LIB_PATH}/${PACKAGE_NAME}/${PACKAGE_VERSION}.a ${shell pwd}/${LIB_PATH}/lib${PACKAGE_NAME}.a
 
 register_app:
-	${call mkdir,${APP_NAME}}
+	${call mkdir,${APP_NAME}/${VERSION}}
 
-upload_static: lib${APP_NAME}.a.${VERSION}
-	${call upload,${APP_NAME},$<}
-	${call upload,${APP_NAME},${SRC_PATH}/${APP_NAME}.h}
+upload_static: lib${APP_NAME}.a
+	${call upload,${APP_NAME}/${VERSION},$<}
+	${call upload,${APP_NAME}/${VERSION},${SRC_PATH}/${APP_NAME}.h}
 
 install_binary: ${INSTALL_PATH}/bin/
 	${call print,INSTALL $<}
 	${Q}cp ${APP_NAME} ${INSTALL_PATH}/bin/
 
-install_static: lib${APP_NAME}.a.${VERSION} ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include/ ${INSTALL_PATH}/lib/
+install_static: lib${APP_NAME}.a ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include/ ${INSTALL_PATH}/lib/
 	${call print,INSTALL $<}
 	${Q}cp ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include/
-	${Q}cp lib${APP_NAME}.a.${VERSION} ${INSTALL_PATH}/lib/
+	${Q}cp lib${APP_NAME}.a ${INSTALL_PATH}/lib/
 
 install_shared: lib${APP_NAME}.so.${VERSION} ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include/ ${INSTALL_PATH}/lib/
 	${call print,INSTALL $<}

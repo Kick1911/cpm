@@ -29,9 +29,9 @@ define print
 endef
 
 define download
-curl 'https://app.smartfile.com/api/2/path/data/${1}/${2}' \
+curl 'https://app.smartfile.com/api/2/path/data/${1}' \
 	-H 'Authorization: Basic bFFoUVk0ek10SzRQbk11WjBYUjdFenQyOW9pSWZEOm9WclcxcWJDNlA4OWQyZjBuRTVrUElYaHczTGRvcQ==' \
-	-o ${3}/${2}
+	-o ${2}
 endef
 
 define upload
