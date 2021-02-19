@@ -22,7 +22,7 @@ CPM_APP_FUNCTION(update){
 
     json_free(structure);
     return 0;
-    error:
+error:
     json_free(structure);
     return 1;
 }

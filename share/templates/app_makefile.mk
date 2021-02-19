@@ -39,7 +39,7 @@ ${LIB_PATH}/%:
 
 	${Q}mkdir -p ${LIB_PATH}/${PACKAGE_NAME}
 	${call download,${PACKAGE_NAME}/${PACKAGE_VERSION}/lib${PACKAGE_NAME}.a,${LIB_PATH}/${PACKAGE_NAME}/${PACKAGE_VERSION}.a}
-	${call download,${PACKAGE_NAME}/${PACKAGE_VERSION}/${PACKAGE_NAME}.h,${INCLUDE_PATH}/${PACKAGE_VERSION}.h}
+	${call download,${PACKAGE_NAME}/${PACKAGE_VERSION}/${PACKAGE_NAME}.h,${INCLUDE_PATH}/${PACKAGE_NAME}.h}
 	${Q}ln -sf ${shell pwd}/${LIB_PATH}/${PACKAGE_NAME}/${PACKAGE_VERSION}.a ${shell pwd}/${LIB_PATH}/lib${PACKAGE_NAME}.a
 
 register_app:
