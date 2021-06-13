@@ -30,17 +30,17 @@ endef
 
 define download
 curl 'https://app.smartfile.com/api/2/path/data/${1}' \
-	-H 'Authorization: Basic bFFoUVk0ek10SzRQbk11WjBYUjdFenQyOW9pSWZEOm9WclcxcWJDNlA4OWQyZjBuRTVrUElYaHczTGRvcQ==' \
+	-H 'Authorization: Basic ${CPM_API_TOKEN}' \
 	-o ${2}
 endef
 
 define upload
-curl -X POST  'https://app.smartfile.com/api/2/path/data/${1}' \
-	-H 'Authorization: Basic bFFoUVk0ek10SzRQbk11WjBYUjdFenQyOW9pSWZEOm9WclcxcWJDNlA4OWQyZjBuRTVrUElYaHczTGRvcQ==' \
-	-H 'Content-Type: multipart/form-data; charset=utf-8'   -F 'file=@${2}'
+curl -X POST 'https://app.smartfile.com/api/2/path/data/${1}' \
+	-H 'Authorization: Basic ${CPM_API_TOKEN}' \
+	-H 'Content-Type: multipart/form-data; charset=utf-8' -F 'file=@${2}'
 endef
 
 define mkdir
 curl -X PUT  'https://app.smartfile.com/api/2/path/oper/mkdir/${1}' \
-	-H 'Authorization: Basic bFFoUVk0ek10SzRQbk11WjBYUjdFenQyOW9pSWZEOm9WclcxcWJDNlA4OWQyZjBuRTVrUElYaHczTGRvcQ=='
+	-H 'Authorization: Basic ${CPM_API_TOKEN}'
 endef
