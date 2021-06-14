@@ -14,19 +14,20 @@
 
 int fill_project(json_t* json, char* p, const char** args, size_t arg_len, const char** exclude){
     char* key = NULL, path[PATH_MAX];
-    void* value = NULL, *jloop = NULL;
+    json_value_t* value = NULL;
+    void* jloop = NULL;
     size_t path_len = strlen(p);
 
     xstrcpy(path, p);
     jloop = json_iter(json);
     while( !json_next(jloop, &key, &value) ){
         sprintf(path + path_len, "/%s", key);
-        switch(json_type(value)){
+        switch(value->type){
             case JSON_OBJECT:
                 WITH(render(path, args, arg_len), filepath,
                     make_dir(filepath, DIR_PERMISSIONS);
                 );
-                fill_project(json_data(value), path, args, arg_len, exclude);
+                fill_project(value->data, path, args, arg_len, exclude);
             break;
             case JSON_STRING:{
                 char* flag = NULL;
@@ -40,7 +41,7 @@ int fill_project(json_t* json, char* p, const char** args, size_t arg_len, const
                     char* text;
                     char template_path[PATH_MAX];
 
-                    file = json_data(value);
+                    file = value->data;
 
                     sprintf(template_path, "%s/templates/%s", CPM_SHARE_DIR, file);
                     text = read_file(template_path);
