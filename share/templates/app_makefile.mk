@@ -29,25 +29,20 @@ lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
 	${call print,'SYMLINK $@'}
 	${Q}ln -sf $@.${VERSION} $@
 
-dep: ${DEPENDENCIES:%=${LIB_PATH}/%.a}
+dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
 
 ${LIB_PATH}/%:
-	${eval LIB_NAME = ${basename ${notdir $@}}}
-	${eval A = ${dir ${@:${LIB_PATH}/%=%}}}
-	${eval PACKAGE_NAME = ${subst /,,${A:lib/%=%}}}
-	${eval PACKAGE_VERSION = ${notdir ${LIB_NAME}}}
+	${eval WORD_LIST = ${subst /, ,$@}}
+	${eval ORG = ${word 2, ${WORD_LIST}}}
+	${eval PROJECT = ${word 3, ${WORD_LIST}}}
+	${eval VERSION = ${word 4, ${WORD_LIST}}}
+	${eval LIB_NAME = ${word 5, ${WORD_LIST}}}
+	${eval NAME = ${word 1, ${subst ., ,${LIB_NAME:lib%=%}}}}
 
-	${Q}mkdir -p ${LIB_PATH}/${PACKAGE_NAME}
-	${call download,${PACKAGE_NAME}/${PACKAGE_VERSION}/lib${PACKAGE_NAME}.a,${LIB_PATH}/${PACKAGE_NAME}/${PACKAGE_VERSION}.a}
-	${call download,${PACKAGE_NAME}/${PACKAGE_VERSION}/${PACKAGE_NAME}.h,${INCLUDE_PATH}/${PACKAGE_NAME}.h}
-	${Q}ln -sf ${shell pwd}/${LIB_PATH}/${PACKAGE_NAME}/${PACKAGE_VERSION}.a ${shell pwd}/${LIB_PATH}/lib${PACKAGE_NAME}.a
-
-register_app:
-	${call mkdir,${APP_NAME}/${VERSION}}
-
-upload_static: lib${APP_NAME}.a
-	${call upload,${APP_NAME}/${VERSION},$<}
-	${call upload,${APP_NAME}/${VERSION},${SRC_PATH}/${APP_NAME}.h}
+	${Q}mkdir -p ${dir $@}
+	${call get_archive,${ORG}/${PROJECT},${VERSION},${LIB_NAME},$@}
+	${call get_header,${ORG}/${PROJECT},${VERSION},${NAME},${INCLUDE_PATH}}
+	${Q}ln -sf ${shell pwd}/$@ ${shell pwd}/${LIB_PATH}/${LIB_NAME}
 
 install_binary: ${INSTALL_PATH}/bin/
 	${call print,INSTALL $<}
@@ -76,4 +71,4 @@ clean:
 	${Q}${MAKE} -C tests clean
 	${Q}${RM} ${APP_NAME} ${SRC_PATH}/${APP_NAME}.o lib${APP_NAME}.* ${COMP_O} ${UTILS_O}
 
-.PHONY: clean all set_pic install_share_folder install_shared install_binary install_static
+.PHONY: clean all set_pic install_share_folder install_shared install_binary install_static dep
