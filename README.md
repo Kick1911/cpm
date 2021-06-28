@@ -52,8 +52,8 @@ $ make shared_library
 ## Run tests
 ```bash
 $ export DEBUG=-g3
-$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)
 $ make clean;cd tests;make
-$ valgrind ./test_<component>.out
+$ make test target=./test_<component>.out # Run one test
+$ make test target=`ls ./*.out` # Run all tests
 ```
 

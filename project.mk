@@ -6,6 +6,6 @@ CFLAGS += -DINSTALL_PATH=${INSTALL_PATH}
 STATIC_DEP = json
 SHARED_DEP =
 
-DEPENDENCIES = Kick1911/json/0.0.2/libjson.a.1
+DEPENDENCIES = Kick1911/json/0.0.2/libjson.a
 
 LDFLAGS += ${STATIC_DEP:%=-l%} ${SHARED_DEP:%=-l%}
