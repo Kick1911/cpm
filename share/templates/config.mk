@@ -29,12 +29,12 @@ define print
 endef
 
 define get_archive
-curl -L -f 'https://github.com/${1}/releases/download/v${2}/${3}' \
+curl -L -f 'https://github.com/${1}/releases/download/${2}/${3}' \
 	-o ${4}
 endef
 
 define get_header
-curl -L -f 'https://raw.githubusercontent.com/${1}/v${2}/src/${3}.h' \
+curl -L -f 'https://raw.githubusercontent.com/${1}/${2}/src/${3}.h' \
 	-o ${4}/${3}.h
 endef
 

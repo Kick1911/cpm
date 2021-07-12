@@ -54,6 +54,5 @@ $ make shared_library
 $ export DEBUG=-g3
 $ make clean;cd tests;make
 $ make test target=./test_<component>.out # Run one test
-$ make test target=`ls ./*.out` # Run all tests
 ```
 
