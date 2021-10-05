@@ -11,7 +11,7 @@ ${APP_NAME}: ${SRC_PATH}/${APP_NAME}.o ${COMP_O} ${UTILS_O}
 	${call print,CC $< -> $@}
 	${Q}${CC} -c $< -o $@ ${CFLAGS}
 
-static_library: lib${APP_NAME}.a.${VERSION}
+static_library: lib${APP_NAME}.a
 
 lib${APP_NAME}.a: ${COMP_O} ${UTILS_O}
 	${call print,AR $@}
