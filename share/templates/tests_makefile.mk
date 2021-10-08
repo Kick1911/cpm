@@ -6,7 +6,7 @@ include ../config.mk
 TESTS_C = ${shell find . -name 'test_*.c'}
 TESTS_OUT := ${TESTS_C:%.c=%.out}
 
-all: ${TESTS_OUT} shared_library
+all: shared_library ${TESTS_OUT}
 
 ${TESTS_OUT}: %.out: %.c
 	${call print,BIN $<}
