@@ -9,7 +9,7 @@ TESTS_OUT := ${TESTS_C:%.c=%.out}
 all: shared_library ${TESTS_OUT}
 
 ${TESTS_OUT}: %.out: %.c
-	${call print,BIN $<}
+	${call print,BIN $< -> $@}
 	${Q}${CC} $< -o $@ ${CFLAGS} ${LDFLAGS} -l${APP_NAME}
 
 shared_library:
