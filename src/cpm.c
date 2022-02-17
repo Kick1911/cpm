@@ -16,19 +16,21 @@ char* CPM_SHARE_DIR;
 
 int run_app(const char* app_name,
             cpm_context_t* context,
-            const char** args){
+            const char** args,
+            int args_len){
     const cpm_app_t* ptr = cpm_apps;
 
     while(ptr->name){
         if(!strcmp(app_name, ptr->name))
-            return ptr->func(context, args + 2);
+            return ptr->func(context, args + 2, args_len - 2);
         ptr++;
     }
     fprintf(stderr, "Command '%s' not found\n", app_name);
     return 1;
 }
 
-int main(int argc, const char** argv){
+int
+main(int argc, const char** argv){
     #ifdef INSTALL_PATH
     char default_share_dir[] = STR(INSTALL_PATH) "/share/cpm";
     #else
@@ -54,5 +56,5 @@ int main(int argc, const char** argv){
     CPM_SHARE_DIR = cpm_share_dir;
 
     context.current_dir = current_dir;
-    return run_app(argv[1], &context, argv);
+    return run_app(argv[1], &context, argv, argc);
 }

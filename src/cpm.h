@@ -5,6 +5,6 @@
 
 extern char* CPM_SHARE_DIR;
 
-int run_app(const char*, cpm_context_t*, const char**);
+int run_app(const char*, cpm_context_t*, const char**, int);
 
 #endif
