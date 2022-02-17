@@ -7,7 +7,7 @@ typedef struct {
 
 typedef struct {
     char* name;
-    int (*func)(const cpm_context_t*, const char**);
+    int (*func)(const cpm_context_t*, const char**, int);
 } cpm_app_t;
 
 #endif

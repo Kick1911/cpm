@@ -1,13 +1,15 @@
-#include <cpm.h>
-#include <cpm_apps.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
+#include <assert.h>
+
+#include <cpm.h>
+#include <cpm_apps.h>
+#include <components/init.h>
 #include <utils/util.h>
 #include <utils/render.h>
-#include <components/init.h>
 
 #define FILE_PERMISSIONS 0644
 #define DIR_PERMISSIONS 0700
@@ -74,9 +76,14 @@ CPM_APP_FUNCTION(init){
     void* json;
     char path_structure[PATH_MAX];
 
+    if(args_len < 1){
+        fprintf(stderr, "`init` requires 1 parameter, `cpm init <name>`\n");
+        return 1;
+    }
+
     sprintf(path_structure, "%s/structure.json", CPM_SHARE_DIR);
     json = json_parse_file(path_structure);
-    create_project(json, *args, args, 1);
+    create_project(json, *args, args, args_len);
     json_free(json);
     return 0;
 }
