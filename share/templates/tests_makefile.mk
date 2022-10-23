@@ -16,7 +16,9 @@ shared_library:
 	${Q}${MAKE} -C .. shared_library
 
 test: all
-	${Q}LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${shell pwd}/.. valgrind --leak-check=full ${target}
+	@for exe in $(TESTS_OUT) ; do \
+		LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${shell pwd}/.. valgrind --error-exitcode=1 --leak-check=full ./$$exe ; \
+	done
 
 clean:
 	${call print,${BRIGHT_CYAN}CLEAN ${APP_NAME} tests}
