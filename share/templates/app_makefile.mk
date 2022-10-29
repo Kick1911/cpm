@@ -4,9 +4,12 @@
 include config.mk
 include project.mk
 
+ARCHIVE_FILES := ${APP_NAME:%=lib%.a}
+LIBRARY_FILES := ${APP_NAME:%=lib%.so}
+
 all: dep ${APP_NAME}
 
-${APP_NAME}: ${SRC_PATH}/${APP_NAME}.o ${COMP_O} ${UTILS_O}
+${APP_NAME}: %: ${SRC_PATH}/%.o ${COMP_O} ${UTILS_O}
 	${call print,${GREEN}BIN $@}
 	${Q}${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
 
@@ -14,9 +17,9 @@ ${APP_NAME}: ${SRC_PATH}/${APP_NAME}.o ${COMP_O} ${UTILS_O}
 	${call print,${CYAN}CC $@}
 	${Q}${CC} -c $< -o $@ ${CFLAGS}
 
-static_library: lib${APP_NAME}.a
+static_library: ${ARCHIVE_FILES}
 
-lib${APP_NAME}.a: ${COMP_O} ${UTILS_O}
+${ARCHIVE_FILES}: ${COMP_O} ${UTILS_O}
 	${call print,${BROWN}AR $@}
 	${Q}cd ${LIB_PATH}; ar -x *.a || true
 	${Q}ar -cq $@ $^ ${shell find ${LIB_PATH} -name '*.o'}
@@ -24,9 +27,9 @@ lib${APP_NAME}.a: ${COMP_O} ${UTILS_O}
 set_pic:
 	${eval CFLAGS += -fPIC}
 
-shared_library: set_pic lib${APP_NAME}.so
+shared_library: set_pic ${LIBRARY_FILES}
 
-lib${APP_NAME}.so: ${COMP_O} ${UTILS_O}
+${LIBRARY_FILES}: ${COMP_O} ${UTILS_O}
 	${call print,${BRIGHT_MAGENTA}LIB $@.${VERSION}}
 	${Q}${CC} -shared -Wl,-soname,$@ -o $@.${VERSION} $^ ${LDFLAGS}
 	${call print,${BRIGHT_CYAN}SYMLINK $@}
@@ -44,6 +47,7 @@ ${LIB_PATH}/%:
 
 	${Q}mkdir -p ${dir $@}
 	${call get_archive,${ORG}/${PROJECT},${VERSION},${LIB_NAME},$@}
+	${Q}mkdir -p ${INCLUDE_PATH}
 	${call get_header,${ORG}/${PROJECT},${VERSION},${NAME},${INCLUDE_PATH}}
 	${Q}ln -sf ${shell pwd}/$@ ${shell pwd}/${LIB_PATH}/${LIB_NAME}
 
@@ -51,19 +55,19 @@ install_binary: ${INSTALL_PATH}/bin/
 	${call print,${GREEN}INSTALL $<}
 	${Q}cp ${APP_NAME} ${INSTALL_PATH}/bin/
 
-install_static: lib${APP_NAME}.a ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include/ ${INSTALL_PATH}/lib/
+install_static: ${ARCHIVE_FILES} ${APP_NAME:%=${SRC_PATH}/%.h} ${INSTALL_PATH}/include/ ${INSTALL_PATH}/lib/
 	${call print,${GREEN}INSTALL $<}
-	${Q}cp ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include/
-	${Q}cp lib${APP_NAME}.a ${INSTALL_PATH}/lib/
+	${Q}cp ${APP_NAME:%=${SRC_PATH}/%.h} ${INSTALL_PATH}/include/
+	${Q}cp ${ARCHIVE_FILES} ${INSTALL_PATH}/lib/
 
-install_shared: lib${APP_NAME}.so.${VERSION} ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include/ ${INSTALL_PATH}/lib/
+install_shared: ${APP_NAME:%=lib%.so.${VERSION}} ${APP_NAME:%=${SRC_PATH}/%.h} ${INSTALL_PATH}/include/ ${INSTALL_PATH}/lib/
 	${call print,${GREEN}INSTALL $<}
-	${Q}cp ${SRC_PATH}/${APP_NAME}.h ${INSTALL_PATH}/include/
-	${Q}cp lib${APP_NAME}.so.${VERSION} ${INSTALL_PATH}/lib/
+	${Q}cp ${APP_NAME:%=${SRC_PATH}/%.h} ${INSTALL_PATH}/include/
+	${Q}cp ${APP_NAME:%=lib%.so.${VERSION}} ${INSTALL_PATH}/lib/
 
-install_share_folder: ${INSTALL_PATH}/share/${APP_NAME}
+install_share_folder: ${APP_NAME:%=${INSTALL_PATH}/share/%}
 	${call print,${GREEN}INSTALL $<}
-	${Q}cp -R ${SHARE_PATH}/* ${INSTALL_PATH}/share/${APP_NAME}
+	${Q}cp -R ${SHARE_PATH}/* ${APP_NAME:%=${INSTALL_PATH}/share/%}
 
 ${INSTALL_PATH}/%:
 	${call print,${GREEN}MKDIR $@}
@@ -72,6 +76,6 @@ ${INSTALL_PATH}/%:
 clean:
 	${call print,${BRIGHT_CYAN}CLEAN ${APP_NAME}}
 	${Q}${MAKE} -C tests clean
-	${Q}${RM} ${APP_NAME} ${SRC_PATH}/${APP_NAME}.o lib${APP_NAME}.* ${COMP_O} ${UTILS_O}
+	${Q}${RM} ${APP_NAME} ${APP_NAME:%=${SRC_PATH}/%.o} ${APP_NAME:%=lib%.*} ${COMP_O} ${UTILS_O}
 
 .PHONY: clean all set_pic install_share_folder install_shared install_binary install_static dep

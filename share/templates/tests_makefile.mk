@@ -10,7 +10,7 @@ all: shared_library ${TESTS_OUT}
 
 ${TESTS_OUT}: %.out: %.c
 	${call print,${GREEN}BIN $@}
-	${Q}${CC} $< -o $@ ${CFLAGS} ${LDFLAGS} -l${APP_NAME}
+	${Q}${CC} $< -o $@ ${CFLAGS} ${LDFLAGS} ${APP_NAME:%=-l%}
 
 shared_library:
 	${Q}${MAKE} -C .. shared_library
