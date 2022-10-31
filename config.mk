@@ -8,21 +8,44 @@ INCLUDE_PATH = ${ROOT}/include
 SHARE_PATH = ${ROOT}/share
 LIB_PATH = ${ROOT}/lib
 
+##### C Language #####
 COMP_C = ${shell find ${COMP_PATH} -name '*.c'}
 UTILS_C = ${shell find ${UTILS_PATH} -name '*.c'}
+SRC_C = ${shell find ${SRC_PATH} -name '*.c'}
 TESTS_C = ${shell find ${TESTS_PATH} -name '*.c'}
 COMP_O = ${COMP_C:%.c=%.o}
 UTILS_O = ${UTILS_C:%.c=%.o}
+SRC_O = ${SRC_C:%.c=%.o}
+APP_FILE_DEPENDENCIES = ${SRC_O} ${UTILS_O} ${COMP_O}
 
 LDFLAGS += -L${ROOT} -L${LIB_PATH}
 
 CFLAGS += ${DEBUG} -ansi -pedantic -Wall -Wno-deprecated-declarations -I${SRC_PATH} -I${INCLUDE_PATH}
+
+##### Haskell #####
+COMP_HS = ${shell find ${COMP_PATH} -name '*.hs'}
+UTILS_HS = ${shell find ${UTILS_PATH} -name '*.hs'}
+SRC_HS = ${shell find ${SRC_PATH} -name '*.hs'}
 
 ifneq ($(V),1)
 Q := @
 # Do not print "Entering directory ...".
 MAKEFLAGS += --no-print-directory
 endif
+
+
+
+# 1: Dependencies
+# 2: Binary file name
+define compile_c
+	${Q}${CC} ${1} -o ${2} ${CFLAGS} ${LDFLAGS}
+endef
+
+define compile_hs
+	${Q}ghc ${1} -o ${2} ${CFLAGS}
+endef
+
+
 
 GREEN = \033[0;32m
 BROWN = \033[0;33m

@@ -9,3 +9,8 @@ SHARED_DEP =
 DEPENDENCIES = Kick1911/json/v0.0.2/libjson.a
 
 LDFLAGS += ${STATIC_DEP:%=-l%} ${SHARED_DEP:%=-l%}
+
+LANGUAGE_EXTENSION = c
+APP_FILE_DEPENDENCIES = ${SRC_O} ${UTILS_O} ${COMP_O}
+
+# If Haskell overwrite CFLAGS. CFLAGS =

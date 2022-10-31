@@ -6,9 +6,9 @@ LIBRARY_FILES := ${APP_NAME:%=lib%.so}
 
 all: dep ${APP_NAME}
 
-${APP_NAME}: %: ${SRC_PATH}/%.o ${COMP_O} ${UTILS_O}
+${APP_NAME}: ${APP_FILE_DEPENDENCIES}
 	${call print,${GREEN}BIN $@}
-	${Q}${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
+	${call compile_${LANGUAGE_EXTENSION},$^,$@}
 
 %.o: %.c
 	${call print,${CYAN}CC $@}
