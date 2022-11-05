@@ -6,7 +6,7 @@ LIBRARY_FILES := ${APP_NAME:%=lib%.so}
 
 all: dep ${APP_NAME}
 
-${APP_NAME}: ${APP_FILE_DEPENDENCIES}
+${APP_NAME}: ${APP_FILE_DEPENDENCIES_${LANGUAGE_EXTENSION}}
 	${call print,${GREEN}BIN $@}
 	${call compile_${LANGUAGE_EXTENSION},$^,$@}
 
@@ -19,7 +19,7 @@ static_library: ${ARCHIVE_FILES}
 ${ARCHIVE_FILES}: ${COMP_O} ${UTILS_O}
 	${call print,${BROWN}AR $@}
 	${Q}cd ${LIB_PATH}; ar -x *.a || true
-	${Q}ar -cq $@ $^ ${shell find ${LIB_PATH} -name '*.o'}
+	${Q}ar -cq $@ $^ ${call get_extension,${LIB_PATH},o}
 
 set_pic:
 	${eval CFLAGS += -fPIC}
@@ -73,6 +73,6 @@ ${INSTALL_PATH}/%:
 clean:
 	${call print,${BRIGHT_CYAN}CLEAN ${APP_NAME}}
 	${Q}${MAKE} -C tests clean
-	${Q}${RM} ${APP_NAME} ${APP_NAME:%=${SRC_PATH}/%.o} ${APP_NAME:%=lib%.*} ${COMP_O} ${UTILS_O}
+	${Q}${RM} ${APP_NAME} ${CLEANUP_FILES_${LANGUAGE_EXTENSION}}
 
 .PHONY: clean all set_pic install_share_folder install_shared install_binary install_static dep
