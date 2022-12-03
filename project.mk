@@ -9,3 +9,4 @@ SHARED_DEP =
 DEPENDENCIES = Kick1911/json/v0.0.2/libjson.a
 
 LDFLAGS += ${STATIC_DEP:%=-l%} ${SHARED_DEP:%=-l%}
+INSTALL_STEPS = install_share_folder install_binary

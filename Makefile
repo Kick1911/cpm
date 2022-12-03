@@ -48,6 +48,8 @@ ${LIB_PATH}/%:
 	${call get_header,${ORG}/${PROJECT},${VERSION},${NAME},${INCLUDE_PATH}}
 	${Q}ln -sf ${shell pwd}/$@ ${shell pwd}/${LIB_PATH}/${LIB_NAME}
 
+install: ${INSTALL_STEPS}
+
 install_binary: ${INSTALL_PATH}/bin/
 	${call print,${GREEN}INSTALL $<}
 	${Q}cp ${APP_NAME} ${INSTALL_PATH}/bin/
