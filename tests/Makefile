@@ -1,7 +1,7 @@
 
 ROOT = ..
-include ../project.mk
 include ../config.mk
+include ../project.mk
 
 TESTS_C = ${shell find . -name 'test_*.c'}
 TESTS_OUT := ${TESTS_C:%.c=%.out}
