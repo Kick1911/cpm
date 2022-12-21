@@ -3,6 +3,8 @@ ROOT = ..
 include ../project.mk
 include ../config.mk
 
+DEBUG = -g3
+
 TESTS_C = ${shell find . -name 'test_*.c'}
 TESTS_OUT := ${TESTS_C:%.c=%.out}
 
