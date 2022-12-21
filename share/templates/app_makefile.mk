@@ -7,7 +7,10 @@ include project.mk
 ARCHIVE_FILES := ${APP_NAME:%=lib%.a}
 LIBRARY_FILES := ${APP_NAME:%=lib%.so}
 
-all: dep ${APP_NAME}
+all: set_debug_vars dep ${APP_NAME}
+
+set_debug_vars:
+	${eval DEBUG = -g3}
 
 ${APP_NAME}: %: ${SRC_PATH}/%.o ${COMP_O} ${UTILS_O}
 	${call print,${GREEN}BIN $@}
@@ -51,6 +54,11 @@ ${LIB_PATH}/%:
 	${call get_header,${ORG}/${PROJECT},${VERSION},${NAME},${INCLUDE_PATH}}
 	${Q}ln -sf ${shell pwd}/$@ ${shell pwd}/${LIB_PATH}/${LIB_NAME}
 
+set_prod_vars:
+	${eval DEBUG = -O3}
+
+prod: set_prod_vars dep ${APP_NAME}
+
 install: ${INSTALL_STEPS}
 
 install_binary: ${INSTALL_PATH}/bin/
@@ -80,4 +88,4 @@ clean:
 	${Q}${MAKE} -C tests clean
 	${Q}${RM} ${APP_NAME} ${APP_NAME:%=${SRC_PATH}/%.o} ${APP_NAME:%=lib%.*} ${COMP_O} ${UTILS_O}
 
-.PHONY: clean all set_pic install_share_folder install_shared install_binary install_static dep
+.PHONY: clean set_prod_vars set_debug_vars prod all set_pic install install_share_folder install_shared install_binary install_static dep
