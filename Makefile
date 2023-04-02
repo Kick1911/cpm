@@ -1,3 +1,6 @@
+# Made with C Project Manager
+# Author: Caswall Engelsman (mail@cengelsman.com)
+
 include config.mk
 include project.mk
 
