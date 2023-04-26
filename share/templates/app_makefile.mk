@@ -40,6 +40,9 @@ ${LIBRARY_FILES}: ${COMP_O} ${UTILS_O}
 
 dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
 
+test:
+	${MAKE} test -C tests
+
 ${LIB_PATH}/%:
 	${eval WORD_LIST = ${subst /, ,$@}}
 	${eval ORG = ${word 2, ${WORD_LIST}}}
