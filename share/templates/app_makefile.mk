@@ -20,7 +20,7 @@ ${APP_NAME}: %: ${SRC_PATH}/%.o ${COMP_O} ${UTILS_O}
 	${call print,${CYAN}CC $@}
 	${Q}${CC} -c $< -o $@ ${CFLAGS}
 
-static_library: ${ARCHIVE_FILES}
+static_library: dep ${ARCHIVE_FILES}
 
 ${ARCHIVE_FILES}: ${COMP_O} ${UTILS_O}
 	${call print,${BROWN}AR $@}
@@ -30,7 +30,7 @@ ${ARCHIVE_FILES}: ${COMP_O} ${UTILS_O}
 set_pic:
 	${eval CFLAGS += -fPIC}
 
-shared_library: set_pic ${LIBRARY_FILES}
+shared_library: set_pic dep ${LIBRARY_FILES}
 
 ${LIBRARY_FILES}: ${COMP_O} ${UTILS_O}
 	${call print,${BRIGHT_MAGENTA}LIB $@.${VERSION}}
