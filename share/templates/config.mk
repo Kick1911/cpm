@@ -43,7 +43,7 @@ curl -L -f 'https://github.com/${1}/releases/download/${2}/${3}' \
 endef
 
 define get_header
-curl -L -f 'https://raw.githubusercontent.com/${1}/${2}/src/${3}.h' \
-	-o ${4}/${3}.h
+curl -L -f 'https://raw.githubusercontent.com/${1}/${2}/src/${3}' \
+	-o ${4}
 endef
 

@@ -43,19 +43,26 @@ dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
 test:
 	${MAKE} test -C tests
 
-${LIB_PATH}/%:
+${LIB_PATH}/%.a:
 	${eval WORD_LIST = ${subst /, ,$@}}
 	${eval ORG = ${word 2, ${WORD_LIST}}}
 	${eval PROJECT = ${word 3, ${WORD_LIST}}}
 	${eval VERSION = ${word 4, ${WORD_LIST}}}
-	${eval LIB_NAME = ${word 5, ${WORD_LIST}}}
-	${eval NAME = ${word 1, ${subst ., ,${LIB_NAME:lib%=%}}}}
-
+	${eval FILE_NAME = ${word 5, ${WORD_LIST}}}
 	${Q}mkdir -p ${dir $@}
-	${call get_archive,${ORG}/${PROJECT},${VERSION},${LIB_NAME},$@}
+	${call get_archive,${ORG}/${PROJECT},${VERSION},${FILE_NAME},$@}
+	${Q}ln -sf ${shell pwd}/$@ ${shell pwd}/${LIB_PATH}/${FILE_NAME}
+
+${LIB_PATH}/%.h:
+	${eval WORD_LIST = ${subst /, ,$@}}
+	${eval ORG = ${word 2, ${WORD_LIST}}}
+	${eval PROJECT = ${word 3, ${WORD_LIST}}}
+	${eval VERSION = ${word 4, ${WORD_LIST}}}
+	${eval FILE_NAME = ${word 5, ${WORD_LIST}}}
+	${Q}mkdir -p ${dir $@}
 	${Q}mkdir -p ${INCLUDE_PATH}
-	${call get_header,${ORG}/${PROJECT},${VERSION},${NAME},${INCLUDE_PATH}}
-	${Q}ln -sf ${shell pwd}/$@ ${shell pwd}/${LIB_PATH}/${LIB_NAME}
+	${call get_header,${ORG}/${PROJECT},${VERSION},${FILE_NAME},$@}
+	${Q}ln -sf ${shell pwd}/$@ ${shell pwd}/${INCLUDE_PATH}/${FILE_NAME}
 
 set_prod_vars:
 	${eval DEBUG = -O3}
