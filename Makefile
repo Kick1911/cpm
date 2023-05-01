@@ -44,8 +44,9 @@ test:
 	${MAKE} test -C tests
 
 release:
-	git tag -a v${VERSION} -m 'Version ${VERSION}'
-	git push origin v${VERSION}
+	${call print,${GREEN}RELEASE v${VERSION}}
+	${Q}git tag -a v${VERSION} -m 'Version ${VERSION}'
+	${Q}git push origin v${VERSION}
 
 ${LIB_PATH}/%.a:
 	${eval WORD_LIST = ${subst /, ,$@}}
