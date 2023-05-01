@@ -43,6 +43,10 @@ dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
 test:
 	${MAKE} test -C tests
 
+release:
+	git tag -a v${VERSION} -m 'Version ${VERSION}'
+	git push origin v${VERSION}
+
 ${LIB_PATH}/%.a:
 	${eval WORD_LIST = ${subst /, ,$@}}
 	${eval ORG = ${word 2, ${WORD_LIST}}}
