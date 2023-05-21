@@ -19,7 +19,8 @@ shared_library:
 
 test: all
 	@for exe in $(TESTS_OUT) ; do \
-		LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${shell pwd}/.. valgrind --error-exitcode=1 --leak-check=full $$exe ; \
+		LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${shell pwd}/.. valgrind --error-exitcode=1 --leak-check=full $$exe; \
+		if [ $? != 0 ]; then return 1; fi \
 	done
 
 clean:
