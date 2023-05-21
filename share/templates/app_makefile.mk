@@ -70,7 +70,7 @@ ${LIB_PATH}/%.h:
 	${Q}ln -sf ${shell pwd}/$@ ${shell pwd}/${INCLUDE_PATH}/${FILE_NAME}
 
 set_prod_vars:
-	${eval DEBUG = -O3}
+	${eval CFLAGS = ${PROD_CFLAGS} ${CFLAGS}}
 
 prod: set_prod_vars dep ${APP_NAME}
 
