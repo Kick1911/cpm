@@ -1,6 +1,9 @@
 # App
 cpm
 
+# Archive
+*.tar.*
+
 # Dependency include
 include
 

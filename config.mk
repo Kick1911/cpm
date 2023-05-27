@@ -1,7 +1,7 @@
 ROOT ?= .
 SRC_PATH = ${ROOT}/src
 COMP_PATH = ${SRC_PATH}/components
-DEP_PATH = ${SRC_PATH}/dependents
+DEP_PATH = ${ROOT}/dependents
 UTILS_PATH = ${SRC_PATH}/utils
 TESTS_PATH = ${ROOT}/tests
 INCLUDE_PATH = ${ROOT}/include
@@ -47,3 +47,6 @@ curl -L -f 'https://raw.githubusercontent.com/${1}/${2}/src/${3}' \
 	-o ${4}
 endef
 
+define gitlab_get_file
+	@curl -L -f 'https://gitlab.com/api/v4/projects/${1}/packages/generic/${2}/dist-${2}.tar.gz' -O --output-dir ${3}
+endef
