@@ -6,6 +6,8 @@ include project.mk
 
 ARCHIVE_FILES := ${APP_NAME:%=lib%.a}
 LIBRARY_FILES := ${APP_NAME:%=lib%.so}
+GITLAB_DEP := ${DEPENDENCIES:gitlab/%=${DEP_PATH}/gitlab/%}
+PACKAGE_CONTENTS ?= ${APP_NAME} ${ARCHIVE_FILES}
 
 all: set_debug_vars dep ${APP_NAME}
 
@@ -38,7 +40,7 @@ ${LIBRARY_FILES}: ${COMP_O} ${UTILS_O}
 	${call print,${BRIGHT_CYAN}SYMLINK $@}
 	${Q}ln -sf $@.${VERSION} $@
 
-dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
+dep: ${GITLAB_DEP}
 
 test:
 	${MAKE} test -C tests
@@ -47,6 +49,18 @@ release:
 	${call print,${GREEN}RELEASE v${VERSION}}
 	${Q}git tag -a v${VERSION} -m 'Version ${VERSION}'
 	${Q}git push origin v${VERSION}
+
+${GITLAB_DEP}:
+	${eval PREFIX = ${DEP_PATH}/gitlab}
+	${eval CLEAN_PREFIX = ${PREFIX:./%=%}}
+	${eval INFO = ${@:${CLEAN_PREFIX}/%=%}}
+	${eval WORD_LIST = ${subst /, ,${INFO}}}
+
+	${eval PROJECT = ${word 1, ${WORD_LIST}}}
+	${eval VERSION = ${word 2, ${WORD_LIST}}}
+
+	${Q}mkdir -p $@
+	${call gitlab_get_file,${PROJECT},${VERSION},$@}
 
 ${LIB_PATH}/%.a:
 	${eval WORD_LIST = ${subst /, ,$@}}
@@ -70,9 +84,16 @@ ${LIB_PATH}/%.h:
 	${Q}ln -sf ${shell pwd}/$@ ${shell pwd}/${INCLUDE_PATH}/${FILE_NAME}
 
 set_prod_vars:
-	${eval CFLAGS = ${PROD_CFLAGS} ${CFLAGS}}
+	${eval DEBUG = -O3}
 
 prod: set_prod_vars dep ${APP_NAME}
+
+package: dep ${DIST_PATH}/${TAR_NAME}
+
+${DIST_PATH}/${TAR_NAME}: ${PACKAGE_CONTENTS}
+	${call print,${GREEN}TAR $@}
+	${Q}mkdir -p ${DIST_PATH}
+	${Q}tar -czf $@ $^
 
 install: ${INSTALL_STEPS}
 
@@ -102,5 +123,6 @@ clean:
 	${call print,${BRIGHT_CYAN}CLEAN ${APP_NAME}}
 	${Q}${MAKE} -C tests clean
 	${Q}${RM} ${APP_NAME} ${APP_NAME:%=${SRC_PATH}/%.o} ${APP_NAME:%=lib%.*} ${COMP_O} ${UTILS_O}
+	${Q}${RM} -R ${DIST_PATH}
 
-.PHONY: clean set_prod_vars set_debug_vars prod all set_pic install install_share_folder install_shared install_binary install_static dep
+.PHONY: package clean set_prod_vars set_debug_vars prod all set_pic install install_share_folder install_shared install_binary install_static dep

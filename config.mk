@@ -49,5 +49,5 @@ curl -L -f 'https://raw.githubusercontent.com/${1}/${2}/src/${3}' \
 endef
 
 define gitlab_get_file
-	@curl -L -f 'https://gitlab.com/api/v4/projects/${1}/packages/generic/${2}/dist-${2}.tar.gz' -O --output-dir ${3}
+	${Q}curl -L -f 'https://gitlab.com/api/v4/projects/${1}/packages/generic/${2}/dist.tar.gz' -O --output-dir ${3}
 endef
