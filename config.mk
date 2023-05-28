@@ -7,6 +7,7 @@ TESTS_PATH = ${ROOT}/tests
 INCLUDE_PATH = ${ROOT}/include
 SHARE_PATH = ${ROOT}/share
 LIB_PATH = ${ROOT}/lib
+DIST_PATH = ${ROOT}/dist
 
 COMP_C = ${shell find ${COMP_PATH} -name '*.c'}
 UTILS_C = ${shell find ${UTILS_PATH} -name '*.c'}

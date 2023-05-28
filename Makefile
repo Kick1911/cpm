@@ -7,6 +7,7 @@ include project.mk
 ARCHIVE_FILES := ${APP_NAME:%=lib%.a}
 LIBRARY_FILES := ${APP_NAME:%=lib%.so}
 GITLAB_DEP := ${DEPENDENCIES:gitlab/%=${DEP_PATH}/gitlab/%}
+PACKAGE_CONTENTS ?= ${APP_NAME} ${ARCHIVE_FILES}
 
 all: set_debug_vars dep ${APP_NAME}
 
@@ -87,11 +88,12 @@ set_prod_vars:
 
 prod: set_prod_vars dep ${APP_NAME}
 
-package: dep ${TAR_NAME}
+package: dep ${DIST_PATH}/${TAR_NAME}
 
-${TAR_NAME}: ${ARCHIVE_FILES}
+${DIST_PATH}/${TAR_NAME}: ${PACKAGE_CONTENTS}
 	${call print,${GREEN}TAR $@}
-	${Q}tar -czf $@ $<
+	${Q}mkdir -p ${DIST_PATH}
+	${Q}tar -czf $@ $^
 
 install: ${INSTALL_STEPS}
 
@@ -120,6 +122,7 @@ ${INSTALL_PATH}/%:
 clean:
 	${call print,${BRIGHT_CYAN}CLEAN ${APP_NAME}}
 	${Q}${MAKE} -C tests clean
-	${Q}${RM} ${APP_NAME} ${TAR_NAME} ${APP_NAME:%=${SRC_PATH}/%.o} ${APP_NAME:%=lib%.*} ${COMP_O} ${UTILS_O}
+	${Q}${RM} ${APP_NAME} ${APP_NAME:%=${SRC_PATH}/%.o} ${APP_NAME:%=lib%.*} ${COMP_O} ${UTILS_O}
+	${Q}${RM} -R ${DIST_PATH}
 
 .PHONY: package clean set_prod_vars set_debug_vars prod all set_pic install install_share_folder install_shared install_binary install_static dep
