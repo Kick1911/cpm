@@ -61,6 +61,7 @@ ${GITLAB_DEP}:
 
 	${Q}mkdir -p $@
 	${call gitlab_get_file,${PROJECT},${VERSION},$@}
+	${Q}cd $@ && tar xvf dist.tar.gz
 
 ${LIB_PATH}/%.a:
 	${eval WORD_LIST = ${subst /, ,$@}}
@@ -88,12 +89,13 @@ set_prod_vars:
 
 prod: set_prod_vars dep ${APP_NAME}
 
-package: dep ${DIST_PATH}/${TAR_NAME}
+package: dep ${TAR_NAME}
 
-${DIST_PATH}/${TAR_NAME}: ${PACKAGE_CONTENTS}
+${TAR_NAME}: ${PACKAGE_CONTENTS}
 	${call print,${GREEN}TAR $@}
 	${Q}mkdir -p ${DIST_PATH}
-	${Q}tar -czf $@ $^
+	${Q}cp -R $^ ${DIST_PATH}
+	${Q}tar -czf $@ -C ${DIST_PATH} .
 
 install: ${INSTALL_STEPS}
 

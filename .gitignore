@@ -6,6 +6,7 @@ cpm
 
 # Dependency include
 include
+dependents
 
 # Test to test in
 temp
