@@ -4,6 +4,8 @@ include ../project.mk
 include ../config.mk
 
 DEBUG = -g3
+LDFLAGS += ${DEPENDENCIES:%=-L${DEP_PATH}/%}
+CFLAGS += ${DEPENDENCIES:%=-I${DEP_PATH}/%}
 
 TESTS_C = ${shell find . -name 'test_*.c'}
 TESTS_OUT := ${TESTS_C:%.c=%.out}
@@ -19,8 +21,7 @@ shared_library:
 
 test: all
 	@for exe in $(TESTS_OUT) ; do \
-		LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${shell pwd}/.. valgrind --error-exitcode=1 --leak-check=full $$exe; \
-		if [ $$? -ne 0 ]; then return 1; fi; \
+		LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${shell pwd}/.. valgrind --error-exitcode=1 --leak-check=full $$exe ; \
 	done
 
 clean:

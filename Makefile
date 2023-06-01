@@ -7,6 +7,10 @@ include project.mk
 ARCHIVE_FILES := ${APP_NAME:%=lib%.a}
 LIBRARY_FILES := ${APP_NAME:%=lib%.so}
 GITLAB_DEP := ${DEPENDENCIES:gitlab/%=${DEP_PATH}/gitlab/%}
+LDFLAGS += ${DEPENDENCIES:%=-L${DEP_PATH}/%}
+CFLAGS += ${DEPENDENCIES:%=-I${DEP_PATH}/%}
+
+TAR_NAME ?= ${APP_NAME}-${VERSION}.tar.gz
 PACKAGE_CONTENTS ?= ${APP_NAME} ${ARCHIVE_FILES}
 
 all: set_debug_vars dep ${APP_NAME}

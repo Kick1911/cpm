@@ -4,6 +4,8 @@ include ../project.mk
 include ../config.mk
 
 DEBUG = -g3
+LDFLAGS += ${DEPENDENCIES:%=-L${DEP_PATH}/%}
+CFLAGS += ${DEPENDENCIES:%=-I${DEP_PATH}/%}
 
 TESTS_C = ${shell find . -name 'test_*.c'}
 TESTS_OUT := ${TESTS_C:%.c=%.out}
