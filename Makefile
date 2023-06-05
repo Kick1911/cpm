@@ -43,14 +43,14 @@ ${LIBRARY_FILES_VERSIONS}: set_pic ${COMP_O} ${UTILS_O}
 
 dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
 
-test: ${TESTS_OUT}
+test: dep ${TESTS_OUT}
 	@for exe in $(TESTS_OUT) ; do \
 		valgrind --error-exitcode=1 --leak-check=full $$exe ; \
 	done
 
 ${TESTS_OUT}: %.out: %.c ${COMP_O} ${UTILS_O}
 	${call print,${GREEN}BIN $@}
-	${Q}${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
+	${Q}${CC} ${filter-out dep,$^} -o $@ ${CFLAGS} ${LDFLAGS}
 
 release:
 	${call print,${GREEN}RELEASE v${VERSION}}
