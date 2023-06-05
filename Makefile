@@ -6,6 +6,7 @@ include project.mk
 
 ARCHIVE_FILES := ${APP_NAME:%=lib%.a}
 LIBRARY_FILES := ${APP_NAME:%=lib%.so}
+LIBRARY_FILES_VERSIONS := ${LIBRARY_FILES:%.so=%.so.${VERSION}}
 
 all: set_debug_vars dep ${APP_NAME}
 
@@ -30,18 +31,26 @@ ${ARCHIVE_FILES}: ${COMP_O} ${UTILS_O}
 set_pic:
 	${eval CFLAGS += -fPIC}
 
-shared_library: set_pic dep ${LIBRARY_FILES}
+shared_library: dep ${LIBRARY_FILES}
 
-${LIBRARY_FILES}: ${COMP_O} ${UTILS_O}
-	${call print,${BRIGHT_MAGENTA}LIB $@.${VERSION}}
-	${Q}${CC} -shared -Wl,-soname,$@ -o $@.${VERSION} $^ ${LDFLAGS}
+${LIBRARY_FILES}: %.so: %.so.${VERSION}
 	${call print,${BRIGHT_CYAN}SYMLINK $@}
-	${Q}ln -sf $@.${VERSION} $@
+	${Q}ln -sf $< $@
+
+${LIBRARY_FILES_VERSIONS}: set_pic ${COMP_O} ${UTILS_O}
+	${call print,${BRIGHT_MAGENTA}LIB $@}
+	${Q}${CC} -shared -Wl,-soname,$@ -o $@ ${filter-out set_pic,$^} ${LDFLAGS}
 
 dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
 
-test:
-	${MAKE} test -C tests
+test: ${TESTS_OUT}
+	@for exe in $(TESTS_OUT) ; do \
+		valgrind --error-exitcode=1 --leak-check=full $$exe ; \
+	done
+
+${TESTS_OUT}: %.out: %.c ${COMP_O} ${UTILS_O}
+	${call print,${GREEN}BIN $@}
+	${Q}${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
 
 release:
 	${call print,${GREEN}RELEASE v${VERSION}}
@@ -100,7 +109,8 @@ ${INSTALL_PATH}/%:
 
 clean:
 	${call print,${BRIGHT_CYAN}CLEAN ${APP_NAME}}
-	${Q}${MAKE} -C tests clean
 	${Q}${RM} ${APP_NAME} ${APP_NAME:%=${SRC_PATH}/%.o} ${APP_NAME:%=lib%.*} ${COMP_O} ${UTILS_O}
+	${call print,${BRIGHT_CYAN}CLEAN tests}
+	${Q}${RM} ${TESTS_OUT}
 
 .PHONY: clean set_prod_vars set_debug_vars prod all set_pic install install_share_folder install_shared install_binary install_static dep
