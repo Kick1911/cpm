@@ -9,11 +9,12 @@ SHARE_PATH = ${ROOT}/share
 LIB_PATH = ${ROOT}/lib
 DIST_PATH = ${ROOT}/dist
 
-COMP_C = ${shell find ${COMP_PATH} -name '*.c'}
-UTILS_C = ${shell find ${UTILS_PATH} -name '*.c'}
-TESTS_C = ${shell find ${TESTS_PATH} -name '*.c'}
-COMP_O = ${COMP_C:%.c=%.o}
-UTILS_O = ${UTILS_C:%.c=%.o}
+COMP_C := ${shell find ${COMP_PATH} -name '*.c'}
+UTILS_C := ${shell find ${UTILS_PATH} -name '*.c'}
+TESTS_C := ${shell find ${TESTS_PATH} -name '*.c'}
+TESTS_OUT := ${TESTS_C:%.c=%.out}
+COMP_O := ${COMP_C:%.c=%.o}
+UTILS_O := ${UTILS_C:%.c=%.o}
 
 LDFLAGS += -L${ROOT} -L${LIB_PATH}
 

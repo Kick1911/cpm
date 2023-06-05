@@ -4,7 +4,6 @@
     "config.mk": "config.mk",
     "lib": {},
     "tests": {
-        "Makefile": "tests_makefile.mk",
         "test_utils.c": "test_utils.c"
     },
     "src":{
