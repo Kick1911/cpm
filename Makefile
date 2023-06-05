@@ -31,6 +31,9 @@ ${ARCHIVE_FILES}: ${COMP_O} ${UTILS_O}
 set_pic:
 	${eval CFLAGS += -fPIC}
 
+set_debug:
+	${eval DEBUG = -g3}
+
 shared_library: dep ${LIBRARY_FILES}
 
 ${LIBRARY_FILES}: %.so: %.so.${VERSION}
@@ -43,7 +46,7 @@ ${LIBRARY_FILES_VERSIONS}: set_pic ${COMP_O} ${UTILS_O}
 
 dep: ${DEPENDENCIES:%=${LIB_PATH}/%}
 
-test: dep ${TESTS_OUT}
+test: set_debug dep ${TESTS_OUT}
 	@for exe in $(TESTS_OUT) ; do \
 		valgrind --error-exitcode=1 --leak-check=full $$exe ; \
 	done
