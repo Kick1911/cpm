@@ -50,7 +50,7 @@ test: dep ${TESTS_OUT}
 
 ${TESTS_OUT}: %.out: %.c ${COMP_O} ${UTILS_O}
 	${call print,${GREEN}BIN $@}
-	${Q}${CC} ${filter-out dep,$^} -o $@ ${CFLAGS} ${LDFLAGS}
+	${Q}${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
 
 release:
 	${call print,${GREEN}RELEASE v${VERSION}}
