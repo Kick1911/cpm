@@ -55,6 +55,7 @@ dep: ${GITLAB_DEP}
 test: set_debug dep ${TESTS_OUT}
 	@for exe in $(TESTS_OUT) ; do \
 		valgrind --error-exitcode=1 --leak-check=full $$exe ; \
+		if [ $$? -ne 0 ]; then return 1; fi; \
 	done
 
 ${TESTS_OUT}: %.out: %.c ${COMP_O} ${UTILS_O}
