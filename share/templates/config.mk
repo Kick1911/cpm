@@ -18,7 +18,10 @@ UTILS_O := ${UTILS_C:%.c=%.o}
 
 LDFLAGS += -L${ROOT} -L${LIB_PATH}
 
-CFLAGS += ${DEBUG} -ansi -pedantic -Wall -Wno-deprecated-declarations -I${SRC_PATH} -I${INCLUDE_PATH}
+CFLAGS += ${DEBUG} -std=c89 -pedantic -Wall -Wno-deprecated-declarations
+CFLAGS +=  -D_FORTIFY_SOURCE=2 -pipe -Werror=format-security
+CFLAGS += -Werror=implicit-function-declaration
+CFLAGS += -I${SRC_PATH} -I${INCLUDE_PATH}
 PROD_CFLAGS = -O3
 
 ifneq ($(V),1)
