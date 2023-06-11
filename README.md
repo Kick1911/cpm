@@ -56,3 +56,54 @@ $ make clean;cd tests;make
 $ make test target=./test_<component>.out # Run one test
 ```
 
+## Gitlab CI
+```yaml
+variables:
+  PROJECT_NAME: <project name>
+  PACKAGE_REGISTRY_BASE_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic"
+  ARCHIVE_URL: '$PACKAGE_REGISTRY_BASE_URL/dist/$CI_COMMIT_TAG/dist.tar.gz'
+
+stages:
+  - test
+  - upload
+  - release
+
+test_and_build:
+  stage: test
+  image: gcc
+  before_script:
+    - apt update && apt -y install make valgrind
+  script:
+    - make test
+    - make clean
+    - make package
+  artifacts:
+    paths:
+      - './$PROJECT_NAME-*.tar.gz'
+
+upload:
+  stage: upload
+  image: curlimages/curl:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - |
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file $PROJECT_NAME-*.tar.gz $ARCHIVE_URL
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - echo "Releasing $CI_COMMIT_TAG"
+  release:
+    name: 'Release $CI_COMMIT_TAG'
+    tag_name: '$CI_COMMIT_TAG'
+    ref: '$CI_COMMIT_SHA'
+    description: '64bit release $CI_COMMIT_TAG'
+    assets:
+      links:
+        - name: dist.tar.gz
+          url: '$ARCHIVE_URL'
+```
