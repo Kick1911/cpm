@@ -1,8 +1,13 @@
 # App
 cpm
 
+# Archive
+*.tar.*
+
 # Dependency include
 include
+dependents
+dist
 
 # Test to test in
 temp

@@ -6,9 +6,8 @@
 variables:
   PROJECT_NAME: cpm
   PACKAGE_REGISTRY_BASE_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic"
-  PROJECT_URL: '$PACKAGE_REGISTRY_BASE_URL/$PROJECT_NAME/$CI_COMMIT_TAG/$PROJECT_NAME-$CI_COMMIT_TAG'
-  ARCHIVE_NAME: '$PROJECT_NAME-$CI_COMMIT_TAG.tar.gz'
-  ARCHIVE_URL: '$PACKAGE_REGISTRY_BASE_URL/$PROJECT_NAME/$CI_COMMIT_TAG/$ARCHIVE_NAME'
+  PROJECT_URL: '$PACKAGE_REGISTRY_BASE_URL/dist/$CI_COMMIT_TAG/$PROJECT_NAME-$CI_COMMIT_TAG'
+  ARCHIVE_URL: '$PACKAGE_REGISTRY_BASE_URL/dist/$CI_COMMIT_TAG/dist.tar.gz'
 
 stages:
   - test
@@ -24,11 +23,11 @@ test_and_build:
     - make test
     - make clean
     - CFLAGS=-static make prod
-    - 'tar -cvzf $ARCHIVE_NAME share'
+    - make package
   artifacts:
     paths:
       - './$PROJECT_NAME'
-      - './$ARCHIVE_NAME'
+      - './$PROJECT_NAME-*.tar.gz'
 
 upload:
   stage: upload
@@ -39,7 +38,7 @@ upload:
     - |
       curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file $PROJECT_NAME $PROJECT_URL
     - |
-      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file $ARCHIVE_NAME $ARCHIVE_URL
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file $PROJECT_NAME-*.tar.gz $ARCHIVE_URL
 
 release:
   stage: release
@@ -57,5 +56,5 @@ release:
       links:
         - name: '$PROJECT_NAME'
           url: '$PROJECT_URL'
-        - name: '$ARCHIVE_NAME'
+        - name: dist.tar.gz
           url: '$ARCHIVE_URL'

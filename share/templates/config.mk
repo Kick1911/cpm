@@ -1,16 +1,17 @@
 ROOT ?= .
 SRC_PATH = ${ROOT}/src
 COMP_PATH = ${SRC_PATH}/components
-DEP_PATH = ${SRC_PATH}/dependents
+DEP_PATH = ${ROOT}/dependents
 UTILS_PATH = ${SRC_PATH}/utils
 TESTS_PATH = ${ROOT}/tests
 INCLUDE_PATH = ${ROOT}/include
 SHARE_PATH = ${ROOT}/share
 LIB_PATH = ${ROOT}/lib
+DIST_PATH = ${ROOT}/dist
 
 COMP_C := ${shell find ${COMP_PATH} -name '*.c'}
 UTILS_C := ${shell find ${UTILS_PATH} -name '*.c'}
-TESTS_C := ${shell find ${TESTS_PATH} -name '*.c'}
+TESTS_C := ${shell find ${TESTS_PATH} -name 'test_*.c'}
 TESTS_OUT := ${TESTS_C:%.c=%.out}
 COMP_O := ${COMP_C:%.c=%.o}
 UTILS_O := ${UTILS_C:%.c=%.o}
@@ -52,3 +53,6 @@ curl -L -f 'https://raw.githubusercontent.com/${1}/${2}/src/${3}' \
 	-o ${4}
 endef
 
+define gitlab_get_file
+	${Q}curl -L -f 'https://gitlab.com/api/v4/projects/${1}/packages/generic/dist/v${2}/dist.tar.gz' -O --output-dir ${3}
+endef
