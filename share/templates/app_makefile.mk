@@ -7,7 +7,8 @@ include project.mk
 ARCHIVE_FILES := ${APP_NAME:%=lib%.a}
 LIBRARY_FILES := ${APP_NAME:%=lib%.so}
 LIBRARY_FILES_VERSIONS := ${LIBRARY_FILES:%.so=%.so.${VERSION}}
-GITLAB_DEP := ${DEPENDENCIES:gitlab/%=${DEP_PATH}/gitlab/%}
+DEP_PACKAGE_PATHS := ${DEPENDENCIES:%=${DEP_PATH}/%}
+GITLAB_DEP := ${filter ${DEP_PATH}/gitlab/%,${DEP_PACKAGE_PATHS}}
 LDFLAGS += ${DEPENDENCIES:%=-L${DEP_PATH}/%}
 CFLAGS += ${DEPENDENCIES:%=-I${DEP_PATH}/%}
 
@@ -29,13 +30,20 @@ ${APP_NAME}: %: ${SRC_PATH}/%.o ${COMP_O} ${UTILS_O}
 
 static_library: dep ${ARCHIVE_FILES}
 
-${ARCHIVE_FILES}: ${COMP_O} ${UTILS_O}
+${ARCHIVE_FILES}: set_pie ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
 	${call print,${BROWN}AR $@}
-	${Q}cd ${LIB_PATH}; ar -x *.a || true
-	${Q}ar -cq $@ $^ ${shell find ${LIB_PATH} -name '*.o'}
+	${eval DEP_ARCHIVES = ${shell find ${DEP_PATH} -name '*.a'}}
+	${eval OBJECT_FILES = ${filter %.o,$^}}
+	${Q}for arch in ${DEP_ARCHIVES} ; do \
+		ar x $$arch --output `dirname $$arch` ; \
+	done
+	${Q}ar -cq $@ ${OBJECT_FILES} `find ${DEP_PATH} -name '*.o'`
 
 set_pic:
 	${eval CFLAGS += -fPIC}
+
+set_pie:
+	${eval CFLAGS += -fPIE}
 
 set_debug:
 	${eval DEBUG = -g3}
@@ -55,6 +63,7 @@ dep: ${GITLAB_DEP}
 test: set_debug dep ${TESTS_OUT}
 	@for exe in $(TESTS_OUT) ; do \
 		valgrind --error-exitcode=1 --leak-check=full $$exe ; \
+		if [ $$? -ne 0 ]; then return 1; fi; \
 	done
 
 ${TESTS_OUT}: %.out: %.c ${COMP_O} ${UTILS_O}
@@ -139,7 +148,7 @@ ${INSTALL_PATH}/%:
 
 clean:
 	${call print,${BRIGHT_CYAN}CLEAN ${APP_NAME}}
-	${Q}${RM} ${APP_NAME} ${APP_NAME:%=${SRC_PATH}/%.o} ${APP_NAME:%=lib%.*} ${COMP_O} ${UTILS_O}
+	${Q}${RM} ${APP_NAME} ${TAR_NAME} ${APP_NAME:%=${SRC_PATH}/%.o} ${APP_NAME:%=lib%.*} ${COMP_O} ${UTILS_O}
 	${Q}${RM} -R ${DIST_PATH}
 	${call print,${BRIGHT_CYAN}CLEAN tests}
 	${Q}${RM} ${TESTS_OUT}
