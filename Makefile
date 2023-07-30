@@ -10,15 +10,15 @@ LIBRARY_FILES_VERSIONS := ${LIBRARY_FILES:%.so=%.so.${VERSION}}
 DEP_PACKAGE_PATHS := ${DEPENDENCIES:%=${DEP_PATH}/%}
 GITLAB_DEP := ${filter ${DEP_PATH}/gitlab/%,${DEP_PACKAGE_PATHS}}
 LDFLAGS += ${DEPENDENCIES:%=-L${DEP_PATH}/%}
-CFLAGS += ${DEPENDENCIES:%=-I${DEP_PATH}/%}
+CFLAGS += ${DEPENDENCIES:%=-I${DEP_PATH}/%} -DVERSION='"${VERSION}"'
 
-TAR_NAME ?= ${APP_NAME}-${VERSION}.tar.gz
+TAR_NAME ?= ${word 1,${APP_NAME}}-${VERSION}.tar.gz
 PACKAGE_CONTENTS ?= ${APP_NAME} ${ARCHIVE_FILES}
 
 all: set_debug_vars dep ${APP_NAME}
 
 set_debug_vars:
-	${eval DEBUG = -g3}
+	${eval DEBUG = -g3 -DLOG_LEVEL=1}
 
 ${APP_NAME}: %: ${SRC_PATH}/%.o ${COMP_O} ${UTILS_O}
 	${call print,${GREEN}BIN $@}
@@ -45,9 +45,6 @@ set_pic:
 set_pie:
 	${eval CFLAGS += -fPIE}
 
-set_debug:
-	${eval DEBUG = -g3}
-
 shared_library: dep ${LIBRARY_FILES}
 
 ${LIBRARY_FILES}: %.so: %.so.${VERSION}
@@ -60,7 +57,9 @@ ${LIBRARY_FILES_VERSIONS}: set_pic ${COMP_O} ${UTILS_O}
 
 dep: ${GITLAB_DEP}
 
-test: set_debug dep ${TESTS_OUT}
+test_compile: set_debug_vars dep ${TESTS_OUT}
+
+test: test_compile
 	@for exe in $(TESTS_OUT) ; do \
 		valgrind --error-exitcode=1 --leak-check=full $$exe ; \
 		if [ $$? -ne 0 ]; then return 1; fi; \
@@ -153,4 +152,4 @@ clean:
 	${call print,${BRIGHT_CYAN}CLEAN tests}
 	${Q}${RM} ${TESTS_OUT}
 
-.PHONY: package clean set_prod_vars set_debug_vars prod all set_pic install install_share_folder install_shared install_binary install_static dep
+.PHONY: package test test_compile clean set_prod_vars set_debug_vars prod all set_pic install install_share_folder install_shared install_binary install_static dep
