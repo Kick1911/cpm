@@ -1,9 +1,8 @@
 #!/bin/env python3
 
-FILES = [
-    # "share/templates/app_makefile.mk",
-    "share/templates/project.mk"
-]
+import os
+
+directory_path = "share/templates"
 
 print("#ifndef _TEMPLATE_TEXT_H")
 print("#define _TEMPLATE_TEXT_H")
@@ -18,7 +17,12 @@ print("} map_t;")
 print("\n")
 
 print("map_t structure[] = {")
-for path in FILES:
+
+for filename in os.listdir(directory_path):
+    path = os.path.join(directory_path, filename)
+    if not os.path.isfile(path):
+        continue
+
     with open(path, "r") as f:
         text = f.read()
         text = text.replace("\n", "\"\n\"")
