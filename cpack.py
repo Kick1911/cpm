@@ -2,6 +2,12 @@
 
 import os
 
+
+def get_output_path(p):
+    parts = os.path.basename(p).split("#")
+    return "/".join(parts)
+
+
 directory_path = "share/templates"
 
 print("#ifndef _TEMPLATE_TEXT_H")
@@ -27,7 +33,7 @@ for filename in os.listdir(directory_path):
         text = f.read()
         text = text.replace("\n", "\"\n\"")
         text = text.rstrip('"')
-        print("    {\"%s\", \"%s}," % (path, text))
+        print("    {\"%s\", \"%s}," % (get_output_path(path), text))
 
 print("    NULL")
 print("};")
