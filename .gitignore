@@ -1,6 +1,9 @@
 # App
 cpm
 
+# Generated file
+src/project_map.h
+
 # Archive
 *.tar.*
 

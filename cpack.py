@@ -3,9 +3,35 @@
 import os
 
 
+C90_STRING_LIMIT = 509
+
+
 def get_output_path(p):
     parts = os.path.basename(p).split("#")
     return "/".join(parts)
+
+
+def clean_text(text):
+    text = text.replace('\\', '\\\\')
+    text = text.replace('"', '\\"')
+    text = text.replace("\n", "\"\n\"")
+    return text.rstrip('"')
+
+
+def output_map_entry(f, path):
+    slices = []
+
+    text = f.read(C90_STRING_LIMIT)
+    while text:
+        slices.append(text)
+        text = f.read(C90_STRING_LIMIT)
+
+    last = slices.pop()
+
+    for t in slices:
+        print("    {\"%s\", \"%s\"}," % (get_output_path(path), clean_text(t)))
+
+    print("    {\"%s\", \"%s}," % (get_output_path(path), clean_text(last)))
 
 
 directory_path = "share/templates"
@@ -17,7 +43,7 @@ print("\n")
 
 print("typedef struct map {")
 print("    char path[1024];")
-print("    char template[1 << 12];")
+print("    char template[1 << 13];")
 print("} map_t;")
 
 print("\n")
@@ -30,10 +56,8 @@ for filename in os.listdir(directory_path):
         continue
 
     with open(path, "r") as f:
-        text = f.read()
-        text = text.replace("\n", "\"\n\"")
-        text = text.rstrip('"')
-        print("    {\"%s\", \"%s}," % (get_output_path(path), text))
+        output_map_entry(f, path)
 
-print("    NULL")
+print('    {"", ""}')
 print("};")
+print("#endif")
