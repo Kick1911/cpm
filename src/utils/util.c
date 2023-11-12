@@ -40,9 +40,10 @@ int make_dir(const char* d, __mode_t mode){
         goto error;
 
     return 0;
-    error:
-        fprintf(stderr, "Error creating directory: %s\n", d);
-        return 1;
+error:
+    perror("mkdir");
+    fprintf(stderr, "Error creating directory: %s\n", d);
+    return 1;
 }
 
 int make_file(const char* name, __mode_t mode, char* data){
@@ -50,6 +51,7 @@ int make_file(const char* name, __mode_t mode, char* data){
 
     fp = fopen(name, "w");
     if(!fp) {
+        perror("fopen");
         fprintf(stderr, "Error creating file: %s\n", name);
         goto close_file_and_error;
     }
@@ -59,9 +61,9 @@ int make_file(const char* name, __mode_t mode, char* data){
     fclose(fp);
     chmod(name, mode);
     return 0;
-    close_file_and_error:
-        fclose(fp);
-        return 1;
+close_file_and_error:
+    fclose(fp);
+    return 1;
 }
 
 char* read_file(const char* path){

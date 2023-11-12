@@ -1,11 +1,15 @@
+#define _GNU_SOURCE
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libgen.h>
 #include <malloc.h>
 #include <assert.h>
 
 #include <cpm.h>
+#include <project_map.h>
 #include <cpm_apps.h>
 #include <components/init.h>
 #include <utils/util.h>
@@ -60,30 +64,50 @@ int fill_project(json_t* json, char* p, const char** args, size_t arg_len, const
     return 0;
 }
 
-static int create_project(json_t* json, const char* root, const char** args, size_t arg_len){
+static int
+create_project(const char* root, const char** args, size_t arg_len){
     char path[PATH_MAX];
+    map_t* key_value = structure;
 
-    xstrcpy(path, root);
+    sprintf(path, "%s", root);
     /* Create project root */
     WITH(render(path, args, arg_len), filepath,
         make_dir(filepath, DIR_PERMISSIONS);
     );
-    fill_project(json, path, args, arg_len, NULL);
+
+    while ( *(*key_value).path ) {
+        char* dirc;
+        char output_path[PATH_MAX*2];
+        char* output_text = (*key_value).template;
+
+        sprintf(output_path, "%s/%s", path, (*key_value).path);
+        dirc = strdup(output_path);
+
+        printf("Creating output_path: %s\n", output_path);
+
+        WITH(render(dirname(dirc), args, arg_len), filepath,
+            make_dir(filepath, DIR_PERMISSIONS);
+        );
+
+        WITH(render(output_path, args, arg_len), filepath,
+            WITH(render(output_text, args, arg_len), rendered_text,
+                make_file(filepath, FILE_PERMISSIONS, rendered_text);
+            );
+        );
+
+        free(dirc);
+        key_value += 1;
+    }
+
     return 0;
 }
 
 CPM_APP_FUNCTION(init){
-    void* json;
-    char path_structure[PATH_MAX];
-
     if(args_len < 1){
         fprintf(stderr, "`init` requires 1 parameter, `cpm init <name>`\n");
         return 1;
     }
 
-    sprintf(path_structure, "%s/structure.json", CPM_SHARE_DIR);
-    json = json_parse_file(path_structure);
-    create_project(json, *args, args, args_len);
-    json_free(json);
+    create_project(*args, args, args_len);
     return 0;
 }
