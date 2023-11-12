@@ -18,3 +18,8 @@ DEPENDENCIES += gitlab/${UNITEST_PROJECT_ID}/0.2.0
 
 LDFLAGS += ${STATIC_DEP:%=-l%} ${SHARED_DEP:%=-l%}
 INSTALL_STEPS = install_share_folder install_binary
+
+preprocess: ${SRC_PATH}/project_map.h
+
+${SRC_PATH}/project_map.h:
+	${ROOT}/cpack.py > ${SRC_PATH}/project_map.h

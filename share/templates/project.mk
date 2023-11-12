@@ -12,3 +12,5 @@ SHARED_DEP =
 DEPENDENCIES += gitlab/${UNITEST_PROJECT_ID}/0.2.0
 
 LDFLAGS += ${STATIC_DEP:%=-l%} ${SHARED_DEP:%=-l%}
+
+preprocess:
