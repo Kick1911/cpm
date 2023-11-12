@@ -10,8 +10,8 @@
 CPM_APP_FUNCTION(update){
     void* structure = NULL;
     char path_structure[PATH_MAX];
-    const char* argv[1];
-    const char* exclude[] = {".c", ".h", ".json", "project.mk", NULL};
+    /* const char* argv[1];
+    const char* exclude[] = {".c", ".h", ".json", "project.mk", NULL}; */
 
     sprintf(path_structure, "%s/structure.json", CPM_SHARE_DIR);
     structure = json_parse_file(path_structure);
@@ -24,7 +24,7 @@ CPM_APP_FUNCTION(update){
         return 1;
     }
 
-    fill_project(structure, ".", argv, 1, exclude);
+    /* TODO: fill_project(structure, ".", argv, 1, exclude); */
 
     json_free(structure);
     return 0;

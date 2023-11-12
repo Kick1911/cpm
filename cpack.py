@@ -14,7 +14,7 @@ def get_output_path(p):
 def clean_text(text):
     text = text.replace('\\', '\\\\')
     text = text.replace('"', '\\"')
-    text = text.replace("\n", "\"\n\"")
+    text = text.replace("\n", "\\n\"\n\"")
     return text.rstrip('"')
 
 

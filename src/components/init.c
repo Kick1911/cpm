@@ -18,52 +18,6 @@
 #define FILE_PERMISSIONS 0644
 #define DIR_PERMISSIONS 0700
 
-int fill_project(json_t* json, char* p, const char** args, size_t arg_len, const char** exclude){
-    char* key = NULL, path[PATH_MAX];
-    json_value_t* value = NULL;
-    void* jloop = NULL;
-    size_t path_len = strlen(p);
-
-    xstrcpy(path, p);
-    jloop = json_iter(json);
-    while( !json_next(jloop, &key, &value) ){
-        sprintf(path + path_len, "/%s", key);
-        switch(value->type){
-            case JSON_OBJECT:
-                WITH(render(path, args, arg_len), filepath,
-                    make_dir(filepath, DIR_PERMISSIONS);
-                );
-                fill_project(value->data, path, args, arg_len, exclude);
-            break;
-            case JSON_STRING:{
-                char* flag = NULL;
-                const char** ex = exclude;
-                if(ex)
-                    while(*ex && !(flag = strstr(key, *ex++)));
-                if(flag)
-                    continue;
-                WITH(render(path, args, arg_len), filepath,
-                    char* file;
-                    char* text;
-                    char template_path[PATH_MAX];
-
-                    file = value->data;
-
-                    sprintf(template_path, "%s/templates/%s", CPM_SHARE_DIR, file);
-                    text = read_file(template_path);
-                    WITH(render(text, args, arg_len), rendered_text,
-                        make_file(filepath, FILE_PERMISSIONS, rendered_text);
-                    );
-                    free(text);
-                );
-            }break;
-            default:
-            break;
-        }
-    }
-    return 0;
-}
-
 static int
 create_project(const char* root, const char** args, size_t arg_len){
     char path[PATH_MAX];
@@ -80,6 +34,8 @@ create_project(const char* root, const char** args, size_t arg_len){
         char output_path[PATH_MAX*2];
         char* output_text = (*key_value).template;
 
+        /* TODO: Be able to generate a directory */
+
         sprintf(output_path, "%s/%s", path, (*key_value).path);
         dirc = strdup(output_path);
 
@@ -91,7 +47,7 @@ create_project(const char* root, const char** args, size_t arg_len){
 
         WITH(render(output_path, args, arg_len), filepath,
             WITH(render(output_text, args, arg_len), rendered_text,
-                make_file(filepath, FILE_PERMISSIONS, rendered_text);
+                make_file(filepath, "a", FILE_PERMISSIONS, rendered_text);
             );
         );
 

@@ -46,10 +46,11 @@ error:
     return 1;
 }
 
-int make_file(const char* name, __mode_t mode, char* data){
+int
+make_file(const char* name, const char* flags, __mode_t mode, char* data){
     FILE* fp;
 
-    fp = fopen(name, "w");
+    fp = fopen(name, flags);
     if(!fp) {
         perror("fopen");
         fprintf(stderr, "Error creating file: %s\n", name);
