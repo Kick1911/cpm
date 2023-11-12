@@ -30,13 +30,16 @@ create_project(const char* root, const char** args, size_t arg_len){
     );
 
     while ( *(*key_value).path ) {
-        char* dirc;
+        char* dirc, *ptr;
         char output_path[PATH_MAX*2];
         char* output_text = (*key_value).template;
 
         /* TODO: Be able to generate a directory */
 
-        sprintf(output_path, "%s/%s", path, (*key_value).path);
+        ptr = xstrcpy(output_path, path);
+        ptr = xstrcpy(ptr, "/");
+        xstrncpy(ptr, (*key_value).path, PATH_MAX);
+
         dirc = strdup(output_path);
 
         printf("Creating output_path: %s\n", output_path);
