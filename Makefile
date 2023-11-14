@@ -24,7 +24,7 @@ ${APP_NAME}: %: ${SRC_PATH}/%.o ${COMP_O} ${UTILS_O}
 	${call print,${GREEN}BIN $@}
 	${Q}${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
 
-%.o: %.c
+%.o: %.c ${shell find ${SRC_PATH} -name '*.h'}
 	${call print,${CYAN}CC $@}
 	${Q}${CC} -c $< -o $@ ${CFLAGS}
 

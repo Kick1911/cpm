@@ -21,8 +21,9 @@ INSTALL_STEPS = install_share_folder install_binary
 
 project: all
 preprocess: ${SRC_PATH}/project_map.h
+	${call print,${YELLOW}PREPROCESS $<}
 
 ${SRC_PATH}/project_map.h: ${ROOT}/cpack.py ${shell find ${SHARE_PATH}/templates}
-	${ROOT}/cpack.py > ${SRC_PATH}/project_map.h
+	${Q}${ROOT}/cpack.py > ${SRC_PATH}/project_map.h
 
 .PHONY: project
