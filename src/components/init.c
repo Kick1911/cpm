@@ -18,17 +18,22 @@
 #define FILE_PERMISSIONS 0644
 #define DIR_PERMISSIONS 0700
 
-static int
-create_project(const char* root, const char** args, size_t arg_len){
+int
+create_project(const char* root, const char** args, size_t arg_len, int update){
     char path[PATH_MAX];
-    map_t* key_value = structure;
+    map_t* key_value = STRUCTURE;
 
     sprintf(path, "%s", root);
 
     while ( *(key_value->path) ) {
         char* dirc, *ptr;
-        char output_path[PATH_MAX*2];
+        char output_path[PATH_MAX * 2];
         char* output_text = key_value->template;
+
+        printf("Creating output_path: %s %d\n", key_value->path, key_value->is_system);
+
+        if (update && !key_value->is_system)
+            goto NEXT;
 
         ptr = xstrcpy(output_path, path);
         ptr = xstrcpy(ptr, "/");
@@ -37,8 +42,6 @@ create_project(const char* root, const char** args, size_t arg_len){
         dirc = strdup(output_path);
         dirname(dirc);
 
-        printf("Creating output_path: %s, %s\n", output_path, dirc);
-
         WITH(render((key_value->is_directory) ? output_path : dirc, args, arg_len), filepath,
             make_dir(filepath, DIR_PERMISSIONS);
         );
@@ -46,12 +49,18 @@ create_project(const char* root, const char** args, size_t arg_len){
         if (!key_value->is_directory) {
             WITH(render(output_path, args, arg_len), filepath,
                 WITH(render(output_text, args, arg_len), rendered_text,
-                    make_file(filepath, "a", FILE_PERMISSIONS, rendered_text);
+                    make_file(
+                        filepath,
+                        (key_value->append) ? "a" : "w",
+                        FILE_PERMISSIONS,
+                        rendered_text
+                    );
                 );
             );
         }
 
         free(dirc);
+NEXT:
         key_value += 1;
     }
 
@@ -64,6 +73,6 @@ CPM_APP_FUNCTION(init){
         return 1;
     }
 
-    create_project(*args, args, args_len);
+    create_project(*args, args, args_len, 0);
     return 0;
 }

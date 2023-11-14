@@ -1,0 +1,4 @@
+{
+    "Makefile": {"type": "system"},
+    "config.mk": {"type": "system"}
+}
