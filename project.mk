@@ -22,7 +22,7 @@ INSTALL_STEPS = install_share_folder install_binary
 project: all
 preprocess: ${SRC_PATH}/project_map.h
 
-${SRC_PATH}/project_map.h:
+${SRC_PATH}/project_map.h: ${ROOT}/cpack.py
 	${ROOT}/cpack.py > ${SRC_PATH}/project_map.h
 
 .PHONY: project

@@ -24,35 +24,32 @@ create_project(const char* root, const char** args, size_t arg_len){
     map_t* key_value = structure;
 
     sprintf(path, "%s", root);
-    /* Create project root */
-    WITH(render(path, args, arg_len), filepath,
-        make_dir(filepath, DIR_PERMISSIONS);
-    );
 
-    while ( *(*key_value).path ) {
+    while ( *(key_value->path) ) {
         char* dirc, *ptr;
         char output_path[PATH_MAX*2];
-        char* output_text = (*key_value).template;
-
-        /* TODO: Be able to generate a directory */
+        char* output_text = key_value->template;
 
         ptr = xstrcpy(output_path, path);
         ptr = xstrcpy(ptr, "/");
-        xstrncpy(ptr, (*key_value).path, PATH_MAX);
+        xstrncpy(ptr, key_value->path, PATH_MAX);
 
         dirc = strdup(output_path);
+        dirname(dirc);
 
-        printf("Creating output_path: %s\n", output_path);
+        printf("Creating output_path: %s, %s\n", output_path, dirc);
 
-        WITH(render(dirname(dirc), args, arg_len), filepath,
+        WITH(render((key_value->is_directory) ? output_path : dirc, args, arg_len), filepath,
             make_dir(filepath, DIR_PERMISSIONS);
         );
 
-        WITH(render(output_path, args, arg_len), filepath,
-            WITH(render(output_text, args, arg_len), rendered_text,
-                make_file(filepath, "a", FILE_PERMISSIONS, rendered_text);
+        if (!key_value->is_directory) {
+            WITH(render(output_path, args, arg_len), filepath,
+                WITH(render(output_text, args, arg_len), rendered_text,
+                    make_file(filepath, "a", FILE_PERMISSIONS, rendered_text);
+                );
             );
-        );
+        }
 
         free(dirc);
         key_value += 1;
