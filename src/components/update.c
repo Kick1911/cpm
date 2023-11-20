@@ -14,7 +14,7 @@ CPM_APP_FUNCTION(update){
     }
 
     if (create_project(".", args, args_len, 1)) {
-        fprintf(stderr, "Failed to update project.");
+        fprintf(stderr, "Failed to update project.\n");
         return 1;
     }
 
