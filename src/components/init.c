@@ -30,8 +30,6 @@ create_project(const char* root, const char** args, size_t arg_len, int update){
         char output_path[PATH_MAX * 2];
         char* output_text = key_value->template;
 
-        printf("Creating output_path: %s %d\n", key_value->path, key_value->is_system);
-
         if (update && !key_value->is_system)
             goto NEXT;
 
@@ -43,18 +41,29 @@ create_project(const char* root, const char** args, size_t arg_len, int update){
         dirname(dirc);
 
         WITH(render((key_value->is_directory) ? output_path : dirc, args, arg_len), filepath,
-            make_dir(filepath, DIR_PERMISSIONS);
+            if (make_dir(filepath, DIR_PERMISSIONS)) {
+                /* perror("make_dir");
+                fprintf(stderr, "Error creating directory: %s\n", (char*)filepath); */
+            }
         );
 
         if (!key_value->is_directory) {
             WITH(render(output_path, args, arg_len), filepath,
+                if (!key_value->append) {
+                    printf("CREATE %s\n", (char*)filepath);
+                }
+
                 WITH(render(output_text, args, arg_len), rendered_text,
-                    make_file(
+                    int ret = make_file(
                         filepath,
                         (key_value->append) ? "a" : "w",
                         FILE_PERMISSIONS,
                         rendered_text
                     );
+                    if (ret) {
+                        /* perror("make_file");
+                        fprintf(stderr, "Error creating file: %s\n", (char*)filepath); */
+                    }
                 );
             );
         }

@@ -26,7 +26,8 @@ char* x_str(const char* s, size_t l){
     return b;
 }
 
-int make_dir(const char* d, __mode_t mode){
+int
+make_dir(const char* d, __mode_t mode){
     char buffer[PATH_MAX*2] = {0};
     struct stat st = {0};
 
@@ -41,8 +42,6 @@ int make_dir(const char* d, __mode_t mode){
 
     return 0;
 error:
-    perror("mkdir");
-    fprintf(stderr, "Error creating directory: %s\n", d);
     return 1;
 }
 
@@ -52,8 +51,6 @@ make_file(const char* name, const char* flags, __mode_t mode, char* data){
 
     fp = fopen(name, flags);
     if(!fp) {
-        perror("fopen");
-        fprintf(stderr, "Error creating file: %s\n", name);
         goto close_file_and_error;
     }
     if(data)
