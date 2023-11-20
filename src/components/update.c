@@ -1,7 +1,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <linux/limits.h>
+#include <limits.h>
 
 #include <cpm.h>
 #include <cpm_apps.h>

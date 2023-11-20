@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <utils/util.h>
 #include <malloc.h>
 #include <string.h>
@@ -27,7 +29,7 @@ char* x_str(const char* s, size_t l){
 }
 
 int
-make_dir(const char* d, __mode_t mode){
+make_dir(const char* d, mode_t mode){
     char buffer[PATH_MAX*2] = {0};
     struct stat st = {0};
 
@@ -46,7 +48,7 @@ error:
 }
 
 int
-make_file(const char* name, const char* flags, __mode_t mode, char* data){
+make_file(const char* name, const char* flags, mode_t mode, char* data){
     FILE* fp;
 
     fp = fopen(name, flags);
