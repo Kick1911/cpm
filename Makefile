@@ -24,7 +24,7 @@ ${APP_NAME}: %: ${SRC_PATH}/%.o ${COMP_O} ${UTILS_O}
 	${call print,${GREEN}BIN $@}
 	${Q}${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
 
-%.o: %.c
+%.o: %.c ${shell find ${SRC_PATH} -name '*.h'}
 	${call print,${CYAN}CC $@}
 	${Q}${CC} -c $< -o $@ ${CFLAGS}
 
@@ -55,7 +55,7 @@ ${LIBRARY_FILES_VERSIONS}: set_pic ${COMP_O} ${UTILS_O}
 	${call print,${BRIGHT_MAGENTA}LIB $@}
 	${Q}${CC} -shared -Wl,-soname,$@ -o $@ ${filter-out set_pic,$^} ${LDFLAGS}
 
-dep: ${GITLAB_DEP}
+dep: ${GITLAB_DEP} preprocess
 
 test_compile: set_debug_vars dep ${TESTS_OUT}
 
@@ -152,4 +152,4 @@ clean:
 	${call print,${BRIGHT_CYAN}CLEAN tests}
 	${Q}${RM} ${TESTS_OUT}
 
-.PHONY: package test test_compile clean set_prod_vars set_debug_vars prod all set_pic install install_share_folder install_shared install_binary install_static dep
+.PHONY: preprocess package test test_compile clean set_prod_vars set_debug_vars prod all set_pic install install_share_folder install_shared install_binary install_static dep

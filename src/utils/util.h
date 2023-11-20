@@ -19,7 +19,7 @@ int number_of_digits(int);
 char* xstrcpy(char* dest, const char* src);
 char* xstrncpy(char* dest, const char* src, long int);
 char* x_str(const char*, unsigned long);
-int make_file(const char*, __mode_t, char*);
+int make_file(const char*, const char*, __mode_t, char*);
 int make_dir(const char*, __mode_t);
 char* read_file(const char*);
 

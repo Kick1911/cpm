@@ -1,11 +1,15 @@
+#define _GNU_SOURCE
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libgen.h>
 #include <malloc.h>
 #include <assert.h>
 
 #include <cpm.h>
+#include <project_map.h>
 #include <cpm_apps.h>
 #include <components/init.h>
 #include <utils/util.h>
@@ -14,76 +18,70 @@
 #define FILE_PERMISSIONS 0644
 #define DIR_PERMISSIONS 0700
 
-int fill_project(json_t* json, char* p, const char** args, size_t arg_len, const char** exclude){
-    char* key = NULL, path[PATH_MAX];
-    json_value_t* value = NULL;
-    void* jloop = NULL;
-    size_t path_len = strlen(p);
-
-    xstrcpy(path, p);
-    jloop = json_iter(json);
-    while( !json_next(jloop, &key, &value) ){
-        sprintf(path + path_len, "/%s", key);
-        switch(value->type){
-            case JSON_OBJECT:
-                WITH(render(path, args, arg_len), filepath,
-                    make_dir(filepath, DIR_PERMISSIONS);
-                );
-                fill_project(value->data, path, args, arg_len, exclude);
-            break;
-            case JSON_STRING:{
-                char* flag = NULL;
-                const char** ex = exclude;
-                if(ex)
-                    while(*ex && !(flag = strstr(key, *ex++)));
-                if(flag)
-                    continue;
-                WITH(render(path, args, arg_len), filepath,
-                    char* file;
-                    char* text;
-                    char template_path[PATH_MAX];
-
-                    file = value->data;
-
-                    sprintf(template_path, "%s/templates/%s", CPM_SHARE_DIR, file);
-                    text = read_file(template_path);
-                    WITH(render(text, args, arg_len), rendered_text,
-                        make_file(filepath, FILE_PERMISSIONS, rendered_text);
-                    );
-                    free(text);
-                );
-            }break;
-            default:
-            break;
-        }
-    }
-    return 0;
-}
-
-static int create_project(json_t* json, const char* root, const char** args, size_t arg_len){
+int
+create_project(const char* root, const char** args, size_t arg_len, int update){
     char path[PATH_MAX];
+    map_t* key_value = STRUCTURE;
 
-    xstrcpy(path, root);
-    /* Create project root */
-    WITH(render(path, args, arg_len), filepath,
-        make_dir(filepath, DIR_PERMISSIONS);
-    );
-    fill_project(json, path, args, arg_len, NULL);
+    sprintf(path, "%s", root);
+
+    while ( *(key_value->path) ) {
+        char* dirc, *ptr;
+        char output_path[PATH_MAX * 2];
+        char* output_text = key_value->template;
+
+        if (update && !key_value->is_system)
+            goto NEXT;
+
+        ptr = xstrcpy(output_path, path);
+        ptr = xstrcpy(ptr, "/");
+        xstrncpy(ptr, key_value->path, PATH_MAX);
+
+        dirc = strdup(output_path);
+        dirname(dirc);
+
+        WITH(render((key_value->is_directory) ? output_path : dirc, args, arg_len), filepath,
+            if (make_dir(filepath, DIR_PERMISSIONS)) {
+                /* perror("make_dir");
+                fprintf(stderr, "Error creating directory: %s\n", (char*)filepath); */
+            }
+        );
+
+        if (!key_value->is_directory) {
+            WITH(render(output_path, args, arg_len), filepath,
+                if (!key_value->append) {
+                    printf("CREATE %s\n", (char*)filepath);
+                }
+
+                WITH(render(output_text, args, arg_len), rendered_text,
+                    int ret = make_file(
+                        filepath,
+                        (key_value->append) ? "a" : "w",
+                        FILE_PERMISSIONS,
+                        rendered_text
+                    );
+                    if (ret) {
+                        /* perror("make_file");
+                        fprintf(stderr, "Error creating file: %s\n", (char*)filepath); */
+                    }
+                );
+            );
+        }
+
+        free(dirc);
+NEXT:
+        key_value += 1;
+    }
+
     return 0;
 }
 
 CPM_APP_FUNCTION(init){
-    void* json;
-    char path_structure[PATH_MAX];
-
     if(args_len < 1){
         fprintf(stderr, "`init` requires 1 parameter, `cpm init <name>`\n");
         return 1;
     }
 
-    sprintf(path_structure, "%s/structure.json", CPM_SHARE_DIR);
-    json = json_parse_file(path_structure);
-    create_project(json, *args, args, args_len);
-    json_free(json);
+    create_project(*args, args, args_len, 0);
     return 0;
 }

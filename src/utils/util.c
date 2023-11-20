@@ -26,7 +26,8 @@ char* x_str(const char* s, size_t l){
     return b;
 }
 
-int make_dir(const char* d, __mode_t mode){
+int
+make_dir(const char* d, __mode_t mode){
     char buffer[PATH_MAX*2] = {0};
     struct stat st = {0};
 
@@ -40,17 +41,16 @@ int make_dir(const char* d, __mode_t mode){
         goto error;
 
     return 0;
-    error:
-        fprintf(stderr, "Error creating directory: %s\n", d);
-        return 1;
+error:
+    return 1;
 }
 
-int make_file(const char* name, __mode_t mode, char* data){
+int
+make_file(const char* name, const char* flags, __mode_t mode, char* data){
     FILE* fp;
 
-    fp = fopen(name, "w");
+    fp = fopen(name, flags);
     if(!fp) {
-        fprintf(stderr, "Error creating file: %s\n", name);
         goto close_file_and_error;
     }
     if(data)
@@ -59,13 +59,13 @@ int make_file(const char* name, __mode_t mode, char* data){
     fclose(fp);
     chmod(name, mode);
     return 0;
-    close_file_and_error:
-        fclose(fp);
-        return 1;
+close_file_and_error:
+    fclose(fp);
+    return 1;
 }
 
 char* read_file(const char* path){
-    long size = 0;
+    long size = 0, bytes_read = 0;
     char* text;
     FILE* f = fopen(path, "r");
 
@@ -73,9 +73,15 @@ char* read_file(const char* path){
     size = ftell(f);
     fseek(f, 0, SEEK_SET);
     text = (char*)malloc(sizeof(char) * (size+1));
-    fread(text, sizeof(char), size, f);
-    text[size] = 0;
+
+    bytes_read = fread(text, sizeof(char), size, f);
+    if (!bytes_read) goto failed;
+    text[bytes_read] = 0;
+
     fclose(f);
 
     return text;
+failed:
+    fclose(f);
+    return NULL;
 }
