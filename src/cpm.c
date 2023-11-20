@@ -1,8 +1,10 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <linux/limits.h>
+#include <limits.h>
 
 #include <cpm.h>
 #include <cpm_apps.h>

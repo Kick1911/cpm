@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <utils/util.h>
 #include <malloc.h>
 #include <string.h>
