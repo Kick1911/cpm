@@ -5,29 +5,40 @@
 
 variables:
   PROJECT_NAME: cpm
+  INSTALL_SCRIPT_NAME: install.sh
   PACKAGE_REGISTRY_BASE_URL: "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic"
   PROJECT_URL: '$PACKAGE_REGISTRY_BASE_URL/dist/$CI_COMMIT_TAG/$PROJECT_NAME-$CI_COMMIT_TAG'
-  ARCHIVE_URL: '$PACKAGE_REGISTRY_BASE_URL/dist/$CI_COMMIT_TAG/dist.tar.gz'
+  INSTALL_SCRIPT_URL: '${PACKAGE_REGISTRY_BASE_URL}/${PROJECT_NAME}/${CI_COMMIT_TAG}/${INSTALL_SCRIPT_NAME}'
+  INSTALL_SCRIPT_LATEST_URL: '${PACKAGE_REGISTRY_BASE_URL}/${PROJECT_NAME}/latest/${INSTALL_SCRIPT_NAME}'
 
 stages:
+  - analysis
   - test
   - upload
   - release
+
+
+analyze:
+  stage: analysis
+  image: gcc
+  before_script:
+    - apt update && apt -y install make python3 musl-dev clang
+  script:
+    - CC=clang make
 
 test_and_build:
   stage: test
   image: gcc
   before_script:
-    - apt update && apt -y install make valgrind
+    - apt update && apt -y install make python3 valgrind musl-tools musl-dev
   script:
+    - gcc --version
     - make test
     - make clean
-    - CFLAGS=-static make prod
-    - make package
+    - CC=musl-gcc make prod
   artifacts:
     paths:
       - './$PROJECT_NAME'
-      - './$PROJECT_NAME-*.tar.gz'
 
 upload:
   stage: upload
@@ -36,9 +47,14 @@ upload:
     - if: $CI_COMMIT_TAG
   script:
     - |
-      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file $PROJECT_NAME $PROJECT_URL
+      echo "#!/bin/sh" >> $INSTALL_SCRIPT_NAME
+      echo "curl $PROJECT_URL -o $INSTALL_PATH/$PROJECT_NAME" >> $INSTALL_SCRIPT_NAME
+      echo "chmod 755 $INSTALL_PATH/$PROJECT_NAME" >> $INSTALL_SCRIPT_NAME
+      chmod 755 $INSTALL_SCRIPT_NAME
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file $INSTALL_SCRIPT_NAME $INSTALL_SCRIPT_URL
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file $INSTALL_SCRIPT_NAME $INSTALL_SCRIPT_LATEST_URL
     - |
-      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file $PROJECT_NAME-*.tar.gz $ARCHIVE_URL
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file $PROJECT_NAME $PROJECT_URL
 
 release:
   stage: release
@@ -54,7 +70,7 @@ release:
     description: '64bit release $CI_COMMIT_TAG'
     assets:
       links:
+        - name: '$INSTALL_SCRIPT_NAME'
+          url: '$INSTALL_SCRIPT_URL'
         - name: '$PROJECT_NAME'
           url: '$PROJECT_URL'
-        - name: dist.tar.gz
-          url: '$ARCHIVE_URL'
