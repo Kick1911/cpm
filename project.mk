@@ -11,10 +11,19 @@ JSON_PROJECT_ID = 16394907
 UNITEST_PROJECT_ID = 11728468
 
 STATIC_DEP = json
-SHARED_DEP =
+SHARED_DEP = c
 
-DEPENDENCIES = gitlab/${JSON_PROJECT_ID}/0.0.2
+DEPENDENCIES += gitlab/${JSON_PROJECT_ID}/0.0.2
 DEPENDENCIES += gitlab/${UNITEST_PROJECT_ID}/0.2.0
 
 LDFLAGS += ${STATIC_DEP:%=-l%} ${SHARED_DEP:%=-l%}
 INSTALL_STEPS = install_share_folder install_binary
+
+project: all
+preprocess: ${SRC_PATH}/project_map.h
+	${call print,${YELLOW}PREPROCESS $<}
+
+${SRC_PATH}/project_map.h: ${ROOT}/cpack.py ${shell find ${SHARE_PATH}/templates}
+	${Q}${ROOT}/cpack.py > ${SRC_PATH}/project_map.h
+
+.PHONY: project
