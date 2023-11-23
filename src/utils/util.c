@@ -52,17 +52,14 @@ make_file(const char* name, const char* flags, mode_t mode, char* data){
     FILE* fp;
 
     fp = fopen(name, flags);
-    if(!fp) {
-        goto close_file_and_error;
-    }
-    if(data)
-        fwrite(data, sizeof(char), strlen(data), fp);
+    if(!fp) goto close_file_and_error;
+
+    if(data) fwrite(data, sizeof(char), strlen(data), fp);
 
     fclose(fp);
     chmod(name, mode);
     return 0;
 close_file_and_error:
-    fclose(fp);
     return 1;
 }
 
