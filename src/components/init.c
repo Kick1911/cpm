@@ -42,8 +42,8 @@ create_project(const char* root, const char** args, size_t arg_len, int update){
 
         WITH(render((key_value->is_directory) ? output_path : dirc, args, arg_len), filepath,
             if (make_dir(filepath, DIR_PERMISSIONS)) {
-                /* perror("make_dir");
-                fprintf(stderr, "Error creating directory: %s\n", (char*)filepath); */
+                perror("make_dir");
+                fprintf(stderr, "Error creating directory: %s\n", (char*)filepath);
             }
         );
 
@@ -61,8 +61,8 @@ create_project(const char* root, const char** args, size_t arg_len, int update){
                         rendered_text
                     );
                     if (ret) {
-                        /* perror("make_file");
-                        fprintf(stderr, "Error creating file: %s\n", (char*)filepath); */
+                        perror("make_file");
+                        fprintf(stderr, "Error creating file: %s\n", (char*)filepath);
                     }
                 );
             );
