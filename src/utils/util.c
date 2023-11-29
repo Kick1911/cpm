@@ -29,19 +29,24 @@ char* x_str(const char* s, size_t l){
 }
 
 int
-make_dir(const char* d, mode_t mode){
+make_dir(const char* d, size_t size, mode_t mode){
+    int ret = 0;
+    char* end, *ptr;
+    char directory[PATH_MAX*2] = {0};
     char buffer[PATH_MAX*2] = {0};
-    struct stat st = {0};
 
-    strcat(buffer, "./");
-    strcat(buffer, d);
+    sprintf(directory, "%s%s", d, (d[size - 1] != '/') ? "/" : "");
 
-    if (stat(buffer, &st) == -1) goto error;
-    if (mkdir(buffer, mode) == -1) goto error;
+    end = strchr(directory, '/');
+    while (end) {
+        ptr = xstrcpy(buffer, "./");
+        xstrncpy(ptr, directory, end - directory);
+        if (mkdir(buffer, mode) == -1) ret = 1;
 
-    return 0;
-error:
-    return 1;
+        end = strchr(end + 1, '/');
+    }
+
+    return ret;
 }
 
 int

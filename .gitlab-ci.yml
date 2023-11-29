@@ -36,7 +36,7 @@ test_and_build:
     - gcc --version
     - make test
     - make clean
-    - CC=musl-gcc make
+    - CC=musl-gcc make prod
   artifacts:
     paths:
       - './$PROJECT_NAME'

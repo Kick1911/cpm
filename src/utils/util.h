@@ -20,7 +20,7 @@ char* xstrcpy(char* dest, const char* src);
 char* xstrncpy(char* dest, const char* src, long int);
 char* x_str(const char*, unsigned long);
 int make_file(const char*, const char*, mode_t, char*);
-int make_dir(const char*, mode_t);
+int make_dir(const char*, size_t, mode_t);
 char* read_file(const char*);
 
 #endif
