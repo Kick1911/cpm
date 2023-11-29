@@ -36,11 +36,8 @@ make_dir(const char* d, mode_t mode){
     strcat(buffer, "./");
     strcat(buffer, d);
 
-    if (stat(buffer, &st) == -1){
-        if(mkdir(buffer, mode))
-            goto error;
-    }else
-        goto error;
+    if (stat(buffer, &st) == -1) goto error;
+    if (mkdir(buffer, mode) == -1) goto error;
 
     return 0;
 error:
@@ -52,9 +49,9 @@ make_file(const char* name, const char* flags, mode_t mode, char* data){
     FILE* fp;
 
     fp = fopen(name, flags);
-    if(!fp) goto close_file_and_error;
+    if (!fp) goto close_file_and_error;
 
-    if(data) fwrite(data, sizeof(char), strlen(data), fp);
+    if (data) fwrite(data, sizeof(char), strlen(data), fp);
 
     fclose(fp);
     chmod(name, mode);
