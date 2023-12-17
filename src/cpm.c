@@ -9,6 +9,7 @@
 #include <cpm.h>
 #include <cpm_apps.h>
 #include <components/components.h>
+#include <utils/logger.h>
 
 /* Force expansion because -D flag does not expand */
 #define XSTR(x) #x
@@ -48,7 +49,7 @@ main(int argc, const char** argv){
         return 1;
     }
     if(!getcwd(current_dir, sizeof(current_dir))){
-        fprintf(stderr, "getcwd() failed.\n");
+        LOG_ERROR("getcwd() failed.\n");
         return 2;
     }
 
