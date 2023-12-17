@@ -8,12 +8,12 @@
 #include <components/init.h>
 
 CPM_APP_FUNCTION(update){
-    if( access("project.mk", F_OK) ){
+    if ( access("project.mk", F_OK) ){
         fprintf(stderr, "Not a cpm project. Change directory to a cpm project.\n");
         return 1;
     }
 
-    if (create_project(".", args, args_len, 1)) {
+    if ( create_project(".", args, args_len, 1) ) {
         fprintf(stderr, "Failed to update project.\n");
         return 1;
     }
