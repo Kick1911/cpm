@@ -4,8 +4,6 @@
 #include <malloc.h>
 #include <string.h>
 
-char* CPM_SHARE_DIR;
-
 int main(void){
     TEST(Rendering start,
         char template[] = "$0<a href=\"\">Blah$1</a>";
