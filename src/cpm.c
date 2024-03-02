@@ -11,16 +11,12 @@
 #include <components/components.h>
 #include <utils/logger.h>
 
-/* Force expansion because -D flag does not expand */
-#define XSTR(x) #x
-#define STR(x) XSTR(x)
 
-char* CPM_SHARE_DIR;
-
-int run_app(const char* app_name,
-            cpm_context_t* context,
-            const char** args,
-            int args_len){
+int
+run_app(const char* app_name,
+        cpm_context_t* context,
+        const char** args,
+        int args_len) {
     const cpm_app_t* ptr = cpm_apps;
 
     while(ptr->name){
@@ -28,35 +24,23 @@ int run_app(const char* app_name,
             return ptr->func(context, args + 2, args_len - 2);
         ptr++;
     }
-    fprintf(stderr, "Command '%s' not found\n", app_name);
+    fprintf(stderr, "Option '%s' not found\n", app_name);
     return 1;
 }
 
 int
-main(int argc, const char** argv){
-    #ifdef INSTALL_PATH
-    char default_share_dir[] = STR(INSTALL_PATH) "/share/cpm";
-    #else
-    char default_share_dir[] = "/usr/share/cpm";
-    #endif
-
-    char current_dir[PATH_MAX], cpm_share_dir[PATH_MAX];
-    char* share_dir = default_share_dir;
+main(int argc, const char** argv) {
+    char current_dir[PATH_MAX];
     cpm_context_t context;
 
     if(argc < 2){
-        fprintf(stderr, "No app given\n");
+        fprintf(stderr, "No options\nTry `cpm init <app_name>`\n");
         return 1;
     }
     if(!getcwd(current_dir, sizeof(current_dir))){
         LOG_ERROR("getcwd() failed.\n");
         return 2;
     }
-
-    if(getenv("CPM_SHARE_DIR"))
-        share_dir = getenv("CPM_SHARE_DIR");
-    strcpy(cpm_share_dir, share_dir);
-    CPM_SHARE_DIR = cpm_share_dir;
 
     context.current_dir = current_dir;
     return run_app(argv[1], &context, argv, argc);
