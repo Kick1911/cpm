@@ -44,9 +44,9 @@ render(const char* template, const char** args, size_t args_l){
 
     while((end = strchr(start, '$'))){
         res = sscanf(end, ARG_FIND_PATTERN, &i);
-        post_ptr = xstrncpy(post_ptr, start, end - start + 2);
+        post_ptr = xstrncpy(post_ptr, start, end - start + 1);
         if(res > 0){
-            post_ptr = xstrcpy(post_ptr-1,
+            post_ptr = xstrcpy(post_ptr - 1,
                                (i < args_l)?
                                     args[i]: NULL_STR);
             end += number_of_digits(i);

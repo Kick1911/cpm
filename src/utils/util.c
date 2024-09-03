@@ -13,13 +13,13 @@ int number_of_digits(int n){
 }
 
 char* xstrcpy(char* dest, const char* src){
-    return xstrncpy(dest, src, 0);
+    return xstrncpy(dest, src, 0) - 1;
 }
 
 char* xstrncpy(char* dest, const char* src, long int n){
     const char* s = src;
     while((*dest++ = *s++) && --n);
-    return dest - 1;
+    return dest;
 }
 
 char* x_str(const char* s, size_t l){

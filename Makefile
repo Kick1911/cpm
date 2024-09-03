@@ -32,12 +32,12 @@ static_library: dep ${ARCHIVE_FILES}
 
 ${ARCHIVE_FILES}: set_pie ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
 	${call print,${BROWN}AR $@}
-	${eval DEP_ARCHIVES = ${shell find ${DEP_PATH} -name '*.a'}}
+	${eval DEP_ARCHIVES = ${shell find ${DEP_PACKAGE_PATHS} -name '*.a'}}
 	${eval OBJECT_FILES = ${filter %.o,$^}}
 	${Q}for arch in ${DEP_ARCHIVES} ; do \
 		ar x $$arch --output `dirname $$arch` ; \
 	done
-	${Q}ar -cq $@ ${OBJECT_FILES} `find ${DEP_PATH} -name '*.o'`
+	${Q}ar -cq $@ ${OBJECT_FILES} `find ${DEP_PACKAGE_PATHS} -name '*.o'`
 
 set_pic:
 	${eval CFLAGS += -fPIC}
