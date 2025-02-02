@@ -37,6 +37,12 @@ ${ARCHIVE_FILES}: set_pie ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
 	${Q}for arch in ${DEP_ARCHIVES} ; do \
 		ar x $$arch --output `dirname $$arch` ; \
 	done
+
+	${Q}for obj in ${OBJECT_FILES} `find ${DEP_PACKAGE_PATHS} -name '*.o'` ; do \
+		for symbol in `nm --defined-only -j -g $$obj` ; do \
+			objcopy --redefine-sym $$symbol=${APP_NAME}_$$symbol $$obj ; \
+		done \
+	done
 	${Q}ar -cq $@ ${OBJECT_FILES} `find ${DEP_PACKAGE_PATHS} -name '*.o'`
 
 set_pic:
