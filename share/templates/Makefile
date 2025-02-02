@@ -70,7 +70,7 @@ dep: ${GITLAB_DEP} preprocess
 test_compile: set_debug_vars dep ${TESTS_OUT}
 
 test: test_compile
-	@for exe in $(TESTS_OUT) ; do \
+	${Q}for exe in $(TESTS_OUT) ; do \
 		valgrind --error-exitcode=1 --leak-check=full $$exe ; \
 		if [ $$? -ne 0 ]; then return 1; fi; \
 	done
