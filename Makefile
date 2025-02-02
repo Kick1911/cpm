@@ -33,17 +33,21 @@ static_library: dep ${ARCHIVE_FILES}
 ${ARCHIVE_FILES}: set_pie ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
 	${call print,${BROWN}AR $@}
 	${eval DEP_ARCHIVES = ${shell find ${DEP_PACKAGE_PATHS} -name '*.a'}}
-	${eval OBJECT_FILES = ${filter %.o,$^}}
 	${Q}for arch in ${DEP_ARCHIVES} ; do \
 		ar x $$arch --output `dirname $$arch` ; \
 	done
 
-	${Q}for obj in ${OBJECT_FILES} `find ${DEP_PACKAGE_PATHS} -name '*.o'` ; do \
+	${eval DEP_OBJECT_FILES := `find ${DEP_PACKAGE_PATHS} -name '*.o'`}
+	${eval OBJECT_FILES := ${filter %.o,$^} ${DEP_OBJECT_FILES}}
+
+	${Q}for obj in ${DEP_OBJECT_FILES}; do \
 		for symbol in `nm --defined-only -j -g $$obj` ; do \
-			objcopy --redefine-sym $$symbol=${APP_NAME}_$$symbol $$obj ; \
+			for x in ${OBJECT_FILES} ; do \
+				objcopy --redefine-sym $$symbol=${APP_NAME}_dependant_$$symbol $$x ; \
+			done \
 		done \
 	done
-	${Q}ar -cq $@ ${OBJECT_FILES} `find ${DEP_PACKAGE_PATHS} -name '*.o'`
+	${Q}ar -cq $@ ${OBJECT_FILES}
 
 set_pic:
 	${eval CFLAGS += -fPIC}
