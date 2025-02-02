@@ -42,8 +42,9 @@ ${ARCHIVE_FILES}: set_pie ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
 
 	${Q}for obj in ${DEP_OBJECT_FILES}; do \
 		for symbol in `nm --defined-only -j -g $$obj` ; do \
+			salt=`tr -dc 'A-Za-z0-9' </dev/urandom | head -c 4` ; \
 			for x in ${OBJECT_FILES} ; do \
-				objcopy --redefine-sym $$symbol=${APP_NAME}_dependant_$$symbol $$x ; \
+				objcopy --redefine-sym $$symbol="${APP_NAME}_$$salt$$symbol" $$x ; \
 			done \
 		done \
 	done
