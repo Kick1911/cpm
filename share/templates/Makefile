@@ -43,12 +43,13 @@ ${ARCHIVE_FILES}: set_pie ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
 	${Q}for obj in ${DEP_OBJECT_FILES}; do \
 		for symbol in `nm --defined-only -j -g $$obj` ; do \
 			salt=`tr -dc 'A-Za-z0-9' </dev/urandom | head -c 4` ; \
-			for x in ${OBJECT_FILES} ; do \
+			for x in ${filter %.o,$^} $$obj ; do \
 				objcopy --redefine-sym $$symbol="${APP_NAME}_$$salt$$symbol" $$x ; \
 			done \
 		done \
 	done
-	${Q}ar -cq $@ ${OBJECT_FILES}
+	${Q}ld -r -o ${APP_NAME}.o ${OBJECT_FILES}
+	${Q}ar -cq $@ ${APP_NAME}.o
 
 set_pic:
 	${eval CFLAGS += -fPIC}
