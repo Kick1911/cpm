@@ -50,6 +50,7 @@ ${ARCHIVE_FILES}: set_pie ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
 	done
 	${Q}ld -r -o ${APP_NAME}.o ${OBJECT_FILES}
 	${Q}ar -cq $@ ${APP_NAME}.o
+	${Q}rm ${APP_NAME}.o
 
 set_pic:
 	${eval CFLAGS += -fPIC}
