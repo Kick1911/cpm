@@ -4,6 +4,7 @@ PACKAGE_CONTENTS := ${APP_NAME}
 
 PROD_CFLAGS = -O3 -static
 INSTALL_PATH = /usr/local
+INSTALL_STEPS = install_binary
 CFLAGS += -DINSTALL_PATH=${INSTALL_PATH}
 
 # Projects
@@ -15,7 +16,6 @@ SHARED_DEP = c
 DEPENDENCIES += gitlab/${UNITEST_PROJECT_ID}/0.2.0
 
 LDFLAGS += ${STATIC_DEP:%=-l%} ${SHARED_DEP:%=-l%}
-INSTALL_STEPS = install_binary
 
 project: all
 preprocess: ${SRC_PATH}/project_map.h
