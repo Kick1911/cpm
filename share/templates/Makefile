@@ -20,6 +20,9 @@ all: set_debug_vars dep ${APP_NAME}
 set_debug_vars:
 	${eval DEBUG = -g3 -DLOG_LEVEL=1}
 
+set_info_vars:
+	${eval DEBUG = -g3 -DLOG_LEVEL=2}
+
 ${APP_NAME}: %: ${SRC_PATH}/%.o ${COMP_O} ${UTILS_O}
 	${call print,${GREEN}BIN $@}
 	${Q}${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
@@ -30,9 +33,15 @@ ${APP_NAME}: %: ${SRC_PATH}/%.o ${COMP_O} ${UTILS_O}
 
 static_library: dep ${ARCHIVE_FILES}
 
-${ARCHIVE_FILES}: set_pie ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
+/tmp/${APP_NAME}_objs:
+	${Q}mkdir -p $@
+	${Q}cp ${SYSTEM_DEP_ARCHIVES} $@
+
+${ARCHIVE_FILES}: set_pie /tmp/${APP_NAME}_objs ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
 	${call print,${BROWN}AR $@}
+	${eval DEP_PACKAGE_PATHS = ${DEP_PACKAGE_PATHS} /tmp/${APP_NAME}_objs}
 	${eval DEP_ARCHIVES = ${shell find ${DEP_PACKAGE_PATHS} -name '*.a'}}
+	${Q}echo ${DEP_ARCHIVES}
 	${Q}for arch in ${DEP_ARCHIVES} ; do \
 		ar x $$arch --output `dirname $$arch` ; \
 	done
@@ -50,6 +59,7 @@ ${ARCHIVE_FILES}: set_pie ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
 	done
 	${Q}ld -r -o ${APP_NAME}.o ${OBJECT_FILES}
 	${Q}ar -cq $@ ${APP_NAME}.o
+	${Q}nm $@ | grep -q "__fprintf_chk" && echo "Error: glibc __fprintf_chk found!" && return 1 || true
 	${Q}rm ${APP_NAME}.o
 
 set_pic:
@@ -57,6 +67,7 @@ set_pic:
 
 set_pie:
 	${eval CFLAGS += -fPIE}
+	${eval LDFLAGS += -static}
 
 shared_library: dep ${LIBRARY_FILES}
 
@@ -70,7 +81,7 @@ ${LIBRARY_FILES_VERSIONS}: set_pic ${COMP_O} ${UTILS_O}
 
 dep: ${GITLAB_DEP} preprocess
 
-test_compile: set_debug_vars dep ${TESTS_OUT}
+test_compile: set_info_vars dep ${TESTS_OUT}
 
 test: test_compile
 	${Q}for exe in $(TESTS_OUT) ; do \
@@ -80,7 +91,7 @@ test: test_compile
 
 ${TESTS_OUT}: %.out: %.c ${COMP_O} ${UTILS_O}
 	${call print,${GREEN}BIN $@}
-	${Q}${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
+	${Q}${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS} ${TEST_LDFLAGS}
 
 release:
 	${call print,${GREEN}RELEASE v${VERSION}}
@@ -123,10 +134,11 @@ ${LIB_PATH}/%.h:
 
 set_prod_vars:
 	${eval CFLAGS = ${PROD_CFLAGS} ${CFLAGS}}
+	${eval LDFLAGS = ${PROD_LDFLAGS} ${LDFLAGS}}
 
 prod: set_prod_vars dep ${APP_NAME}
 
-package: dep ${TAR_NAME}
+package: set_prod_vars dep ${TAR_NAME}
 
 ${TAR_NAME}: ${PACKAGE_CONTENTS}
 	${call print,${GREEN}TAR $@}
