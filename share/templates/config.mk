@@ -19,7 +19,7 @@ UTILS_O := ${UTILS_C:%.c=%.o}
 LDFLAGS += -L${ROOT} -L${LIB_PATH}
 
 CFLAGS += ${DEBUG} -std=c89 -pedantic
-CFLAGS += -Wall -Wextra -Wconversion -Wshadow -Wstrict-prototypes -Wformat=2 -Werror -Wno-deprecated-declarations -Wno-variadic-macros  -Werror=format-security
+CFLAGS += -Wall -Wextra -Wconversion -Wshadow -Wstrict-prototypes -Wformat-security -Wformat=2 -Werror -Wno-deprecated-declarations -Wno-variadic-macros
 CFLAGS += -D_FORTIFY_SOURCE=2 -pipe
 CFLAGS += -I${SRC_PATH} -I${INCLUDE_PATH}
 PROD_CFLAGS = -O3
