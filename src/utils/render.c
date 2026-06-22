@@ -8,19 +8,19 @@
 #define ARG_FIND_PATTERN ("$%d")
 #define NULL_STR ("(null)")
 
-size_t
-render_length(const char* template, const char** args, size_t args_l){
+long
+render_length(const char* template, const char** args, int args_l){
     int i, res;
     const char* start = template;
-    size_t post_length = strlen(template);
+    long post_length = (long)strlen(template);
 
     while((start = strchr(start, '$'))){
         res = sscanf(start, ARG_FIND_PATTERN, &i);
         if(res > 0){
             if(i < args_l && args[i])
-                post_length += strlen(args[i]);
+                post_length += (long)strlen(args[i]);
             else
-                post_length += strlen(NULL_STR);
+                post_length += (long)strlen(NULL_STR);
             post_length -= (1 + number_of_digits(i));
         } else if(!strncmp(start, "$#", 2))
             post_length -= 2;
@@ -31,14 +31,16 @@ render_length(const char* template, const char** args, size_t args_l){
 }
 
 char*
-render(const char* template, const char** args, size_t args_l){
+render(const char* template, const char** args, int args_l){
     int i, res;
-    size_t post_length;
+    long post_length;
     const char* start = template, *end;
     char* post_render, *post_ptr;
 
     post_length = render_length(template, args, args_l);
-    post_render = malloc(sizeof(char) * post_length + 1);
+    if (post_length < 0) return NULL;
+
+    post_render = malloc(sizeof(char) * (size_t)(post_length + 1));
     start = template;
     post_ptr = post_render;
 
