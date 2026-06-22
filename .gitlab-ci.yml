@@ -21,17 +21,17 @@ stages:
 
 analyze:
   stage: analysis
-  image: gcc
+  image: gcc:12
   before_script:
-    - apt update && apt -y install make python3 musl-dev clang
+    - apt update && apt -y install make python3 clang
   script:
     - CC=clang make
 
 test_and_build:
   stage: test
-  image: gcc
+  image: gcc:12
   before_script:
-    - apt update && apt -y install make python3 valgrind musl-tools musl-dev
+    - apt update && apt -y install valgrind make musl-tools musl-dev build-essential binutils curl python3 ca-certificates
   script:
     - gcc --version
     - make test

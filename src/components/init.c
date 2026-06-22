@@ -21,7 +21,7 @@
 #define DIR_PERMISSIONS 0700
 
 int
-create_project(const char* root, const char** args, size_t arg_len, int update){
+create_project(const char* root, const char** args, int arg_len, int update){
     char path[PATH_MAX];
     map_t* key_value = STRUCTURE;
 
@@ -79,6 +79,8 @@ NEXT:
 }
 
 CPM_APP_FUNCTION(init){
+    (void)context;
+
     if(args_len < 1){
         fprintf(stderr, "`init` requires 1 parameter, `cpm init <name>`\n");
         return 1;

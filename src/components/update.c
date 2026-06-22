@@ -1,6 +1,5 @@
 #include <unistd.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <limits.h>
 
 #include <cpm.h>
@@ -8,6 +7,8 @@
 #include <components/init.h>
 
 CPM_APP_FUNCTION(update){
+    (void) context;
+
     if ( access("project.mk", F_OK) ){
         fprintf(stderr, "Not a cpm project. Change directory to a cpm project.\n");
         return 1;

@@ -18,7 +18,7 @@ PACKAGE_CONTENTS ?= ${APP_NAME} ${ARCHIVE_FILES}
 all: set_debug_vars dep ${APP_NAME}
 
 set_debug_vars:
-	${eval DEBUG = -g3 -DLOG_LEVEL=1}
+	${eval DEBUG = -g3 -DLOG_LEVEL=1 -fsanitize=address -fsanitize=undefined}
 
 set_info_vars:
 	${eval DEBUG = -g3 -DLOG_LEVEL=2}

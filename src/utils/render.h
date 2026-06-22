@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-char* render(const char* template, const char** args, unsigned long);
-size_t render_length(const char* template, const char** args, unsigned long);
+char* render(const char* template, const char** args, int);
+long render_length(const char* template, const char** args, int);
 
 #endif

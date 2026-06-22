@@ -66,14 +66,20 @@ close_file_and_error:
 }
 
 char* read_file(const char* path){
-    long size = 0, bytes_read = 0;
+    size_t bytes_read = 0, size = 0;
+    long ret = 0;
     char* text;
     FILE* f = fopen(path, "r");
 
     fseek(f, 0, SEEK_END);
-    size = ftell(f);
+    ret = ftell(f);
     fseek(f, 0, SEEK_SET);
-    text = (char*)malloc(sizeof(char) * (size+1));
+
+    if (ret < 0)
+        goto failed;
+    size = (size_t)ret;
+
+    text = (char*)malloc(sizeof(char) * (size + 1));
 
     bytes_read = fread(text, sizeof(char), size, f);
     if (!bytes_read) goto failed;
