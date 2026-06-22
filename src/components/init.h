@@ -4,6 +4,6 @@
 #include <stddef.h>
 
 int
-create_project(const char* root, const char** args, size_t arg_len, int update);
+create_project(const char* root, const char** args, int arg_len, int update);
 
 #endif
