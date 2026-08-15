@@ -8,8 +8,7 @@ C99-free, `-std=c89 -pedantic -Werror` C CLI. CPM is a project scaffolder/build 
 - `make test` — build all `tests/test_*.c` and run each under `valgrind --error-exitcode=1 --leak-check=full`. **Requires `make clean` first**; default-build `.o` files are ASan-instrumented and fail to link with `test_compile`'s different flags.
 - Single test — `make clean && make tests/test_render.out && valgrind --error-exitcode=1 --leak-check=full ./tests/test_render.out`.
 - `make prod` — static release build (`-O3 -static`). CI parity: `CC=clang make` and `CC=musl-gcc make prod` must pass.
-- `make clean` removes binary, all `.o`/`.out`, `dist/`. `make release` tags and pushes `v${VERSION}` (VERSION in `project.mk`).
-- README test instructions are stale: `export DEBUG=...`, `cd tests; make`, and `make test target=...` do not match the Makefile.
+- `make clean` removes binary, all `.o`/`.d`/`.out`, `dist/`. `make release` tags and pushes `v${VERSION}` (VERSION in `project.mk`).
 
 ## Gotchas
 

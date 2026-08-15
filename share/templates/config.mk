@@ -22,7 +22,6 @@ CFLAGS += ${DEBUG} -std=c89 -pedantic
 CFLAGS += -Wall -Wextra -Wconversion -Wshadow -Wstrict-prototypes -Wformat-security -Wformat=2 -Werror -Wno-deprecated-declarations -Wno-variadic-macros
 CFLAGS += -D_FORTIFY_SOURCE=2 -pipe
 CFLAGS += -I${SRC_PATH} -I${INCLUDE_PATH}
-PROD_CFLAGS = -O3
 
 ifneq ($(V),1)
 Q := @
@@ -44,15 +43,34 @@ define print
 endef
 
 define get_archive
-curl -L -f 'https://github.com/${1}/releases/download/${2}/${3}' \
-	-o ${4}
+	${Q}curl -sSL -f 'https://github.com/${1}/releases/download/${2}/${3}' \
+		-o ${4}
 endef
 
 define get_header
-curl -L -f 'https://raw.githubusercontent.com/${1}/${2}/src/${3}' \
-	-o ${4}
+	${Q}curl -sSL -f 'https://raw.githubusercontent.com/${1}/${2}/src/${3}' \
+		-o ${4}
 endef
 
 define gitlab_get_file
-	${Q}curl -L -f 'https://gitlab.com/api/v4/projects/${1}/packages/generic/dist/v${2}/dist.tar.gz' -O --output-dir ${3}
+	${Q}curl -sSL -f 'https://gitlab.com/api/v4/projects/${1}/packages/generic/dist/v${2}/dist.tar.gz' -O --output-dir ${3}
+endef
+
+define parse_lib_target
+	${eval LIB_WORDS = ${subst /, ,$@}}
+	${eval LIB_ORG = ${word 2,${LIB_WORDS}}}
+	${eval LIB_PROJECT = ${word 3,${LIB_WORDS}}}
+	${eval LIB_VERSION = ${word 4,${LIB_WORDS}}}
+	${eval LIB_FILE = ${word 5,${LIB_WORDS}}}
+endef
+
+define mangle_objects
+	${Q}for obj in `find ${TEMP_OBJECTS_PATH} -name '*.o' ! -path '${TEMP_OBJECTS_PATH}/project/*'` ; do \
+		for symbol in `nm --defined-only -j -g $$obj` ; do \
+			salt=`tr -dc 'A-Za-z0-9' </dev/urandom | head -c 4` ; \
+			for x in ${TEMP_OBJECTS_PATH}/project/*.o $$obj ; do \
+				objcopy --redefine-sym $$symbol="${APP_NAME}_$$salt$$symbol" $$x ; \
+			done \
+		done \
+	done
 endef
