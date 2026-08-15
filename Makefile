@@ -11,6 +11,7 @@ DEP_PACKAGE_PATHS := ${DEPENDENCIES:%=${DEP_PATH}/%}
 GITLAB_DEP := ${filter ${DEP_PATH}/gitlab/%,${DEP_PACKAGE_PATHS}}
 LDFLAGS += ${DEPENDENCIES:%=-L${DEP_PATH}/%}
 CFLAGS += ${DEPENDENCIES:%=-I${DEP_PATH}/%} -DVERSION='"${VERSION}"'
+TEMP_OBJECTS_PATH := /tmp/${APP_NAME}_objs
 
 TAR_NAME ?= ${word 1,${APP_NAME}}-${VERSION}.tar.gz
 PACKAGE_CONTENTS ?= ${APP_NAME} ${ARCHIVE_FILES}
@@ -33,20 +34,19 @@ ${APP_NAME}: %: ${SRC_PATH}/%.o ${COMP_O} ${UTILS_O}
 
 static_library: dep ${ARCHIVE_FILES}
 
-/tmp/${APP_NAME}_objs:
+${TEMP_OBJECTS_PATH}:
 	${Q}mkdir -p $@
-	${Q}cp ${SYSTEM_DEP_ARCHIVES} $@
 
-${ARCHIVE_FILES}: set_pie /tmp/${APP_NAME}_objs ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
+${ARCHIVE_FILES}: set_pie ${TEMP_OBJECTS_PATH} ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
 	${call print,${BROWN}AR $@}
-	${eval DEP_PACKAGE_PATHS = ${DEP_PACKAGE_PATHS} /tmp/${APP_NAME}_objs}
+	${eval DEP_PACKAGE_PATHS = ${DEP_PACKAGE_PATHS} ${SYSTEM_DEP_ARCHIVES}}
 	${eval DEP_ARCHIVES = ${shell find ${DEP_PACKAGE_PATHS} -name '*.a'}}
-	${Q}echo ${DEP_ARCHIVES}
 	${Q}for arch in ${DEP_ARCHIVES} ; do \
-		ar x $$arch --output `dirname $$arch` ; \
+		mkdir -p ${TEMP_OBJECTS_PATH}/`basename $$arch .a` ; \
+		ar x $$arch --output ${TEMP_OBJECTS_PATH}/`basename $$arch .a` ; \
 	done
 
-	${eval DEP_OBJECT_FILES := `find ${DEP_PACKAGE_PATHS} -name '*.o'`}
+	${eval DEP_OBJECT_FILES := `find ${TEMP_OBJECTS_PATH} -name '*.o'`}
 	${eval OBJECT_FILES := ${filter %.o,$^} ${DEP_OBJECT_FILES}}
 
 	${Q}for obj in ${DEP_OBJECT_FILES}; do \
