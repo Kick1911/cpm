@@ -16,58 +16,43 @@ TEMP_OBJECTS_PATH := /tmp/${APP_NAME}_objs
 TAR_NAME ?= ${word 1,${APP_NAME}}-${VERSION}.tar.gz
 PACKAGE_CONTENTS ?= ${APP_NAME} ${ARCHIVE_FILES}
 
-all: set_debug_vars dep ${APP_NAME}
-
-set_debug_vars:
-	${eval DEBUG = -g3 -DLOG_LEVEL=1 -fsanitize=address -fsanitize=undefined}
-
-set_info_vars:
-	${eval DEBUG = -g3 -DLOG_LEVEL=2}
+all: CFLAGS += -g3 -DLOG_LEVEL=1 -fsanitize=address -fsanitize=undefined
+all: dep ${APP_NAME}
 
 ${APP_NAME}: %: ${SRC_PATH}/%.o ${COMP_O} ${UTILS_O}
 	${call print,${GREEN}BIN $@}
 	${Q}${CC} $^ -o $@ ${CFLAGS} ${LDFLAGS}
 
-%.o: %.c ${shell find ${SRC_PATH} -name '*.h'}
+%.d: ;
+%.o: %.c %.d
 	${call print,${CYAN}CC $@}
-	${Q}${CC} -c $< -o $@ ${CFLAGS}
+	${Q}${CC} -MMD -MP -c $< -o $@ ${CFLAGS}
+
+-include ${APP_NAME:%=${SRC_PATH}/%.d} ${COMP_O:%.o=%.d} ${UTILS_O:%.o=%.d}
 
 static_library: dep ${ARCHIVE_FILES}
 
 ${TEMP_OBJECTS_PATH}:
+	${Q}rm -rf $@
 	${Q}mkdir -p $@
 
-${ARCHIVE_FILES}: set_pie ${TEMP_OBJECTS_PATH} ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
+${ARCHIVE_FILES}: CFLAGS += -fPIE
+${ARCHIVE_FILES}: LDFLAGS += -static
+
+${ARCHIVE_FILES}: ${TEMP_OBJECTS_PATH} ${DEP_PACKAGE_PATHS} ${COMP_O} ${UTILS_O}
 	${call print,${BROWN}AR $@}
-	${eval DEP_PACKAGE_PATHS = ${DEP_PACKAGE_PATHS} ${SYSTEM_DEP_ARCHIVES}}
-	${eval DEP_ARCHIVES = ${shell find ${DEP_PACKAGE_PATHS} -name '*.a'}}
+	${eval DEP_ARCHIVES = ${shell find ${DEP_PACKAGE_PATHS} ${SYSTEM_DEP_ARCHIVES} -name '*.a'}}
 	${Q}for arch in ${DEP_ARCHIVES} ; do \
 		mkdir -p ${TEMP_OBJECTS_PATH}/`basename $$arch .a` ; \
 		ar x $$arch --output ${TEMP_OBJECTS_PATH}/`basename $$arch .a` ; \
 	done
-
-	${eval DEP_OBJECT_FILES := `find ${TEMP_OBJECTS_PATH} -name '*.o'`}
-	${eval OBJECT_FILES := ${filter %.o,$^} ${DEP_OBJECT_FILES}}
-
-	${Q}for obj in ${DEP_OBJECT_FILES}; do \
-		for symbol in `nm --defined-only -j -g $$obj` ; do \
-			salt=`tr -dc 'A-Za-z0-9' </dev/urandom | head -c 4` ; \
-			for x in ${filter %.o,$^} $$obj ; do \
-				objcopy --redefine-sym $$symbol="${APP_NAME}_$$salt$$symbol" $$x ; \
-			done \
-		done \
-	done
-	${Q}ld -r -o ${APP_NAME}.o ${OBJECT_FILES}
+	${Q}mkdir -p ${TEMP_OBJECTS_PATH}/project
+	${Q}cp ${filter %.o,$^} ${TEMP_OBJECTS_PATH}/project/
+	${call mangle_objects}
+	${Q}ld -r -o ${APP_NAME}.o `find ${TEMP_OBJECTS_PATH} -name '*.o'`
 	${Q}ar -cq $@ ${APP_NAME}.o
 	${Q}nm $@ | grep -q "__fprintf_chk" && echo "Error: glibc __fprintf_chk found!" && return 1 || true
 	${Q}rm ${APP_NAME}.o
-
-set_pic:
-	${eval CFLAGS += -fPIC}
-
-set_pie:
-	${eval CFLAGS += -fPIE}
-	${eval LDFLAGS += -static}
 
 shared_library: dep ${LIBRARY_FILES}
 
@@ -75,18 +60,20 @@ ${LIBRARY_FILES}: %.so: %.so.${VERSION}
 	${call print,${BRIGHT_CYAN}SYMLINK $@}
 	${Q}ln -sf $< $@
 
-${LIBRARY_FILES_VERSIONS}: set_pic ${COMP_O} ${UTILS_O}
+${LIBRARY_FILES_VERSIONS}: CFLAGS += -fPIC
+
+${LIBRARY_FILES_VERSIONS}: ${COMP_O} ${UTILS_O}
 	${call print,${BRIGHT_MAGENTA}LIB $@}
-	${Q}${CC} -shared -Wl,-soname,$@ -o $@ ${filter-out set_pic,$^} ${LDFLAGS}
+	${Q}${CC} -shared -Wl,-soname,$@ -o $@ $^ ${LDFLAGS}
 
 dep: ${GITLAB_DEP} preprocess
 
-test_compile: set_info_vars dep ${TESTS_OUT}
+test_compile: CFLAGS += -g3 -DLOG_LEVEL=2
+test_compile: dep ${TESTS_OUT}
 
 test: test_compile
-	${Q}for exe in $(TESTS_OUT) ; do \
+	${Q}set -e ; for exe in ${TESTS_OUT} ; do \
 		valgrind --error-exitcode=1 --leak-check=full $$exe ; \
-		if [ $$? -ne 0 ]; then return 1; fi; \
 	done
 
 ${TESTS_OUT}: %.out: %.c ${COMP_O} ${UTILS_O}
@@ -99,46 +86,36 @@ release:
 	${Q}git push origin v${VERSION}
 
 ${GITLAB_DEP}:
-	${eval PREFIX = ${DEP_PATH}/gitlab}
-	${eval CLEAN_PREFIX = ${PREFIX:./%=%}}
-	${eval INFO = ${@:${CLEAN_PREFIX}/%=%}}
-	${eval WORD_LIST = ${subst /, ,${INFO}}}
-
-	${eval PROJECT = ${word 1, ${WORD_LIST}}}
-	${eval VERSION = ${word 2, ${WORD_LIST}}}
-
+	${eval DEP_PREFIX = ${DEP_PATH}/gitlab}
+	${eval DEP_CLEAN = ${DEP_PREFIX:./%=%}}
+	${eval DEP_INFO = ${@:${DEP_CLEAN}/%=%}}
+	${eval DEP_WORDS = ${subst /, ,${DEP_INFO}}}
+	${eval DEP_PROJECT = ${word 1,${DEP_WORDS}}}
+	${eval DEP_VERSION = ${word 2,${DEP_WORDS}}}
 	${Q}mkdir -p $@
-	${call gitlab_get_file,${PROJECT},${VERSION},$@}
+	${call gitlab_get_file,${DEP_PROJECT},${DEP_VERSION},$@}
 	${Q}cd $@ && tar xvf dist.tar.gz
 
 ${LIB_PATH}/%.a:
-	${eval WORD_LIST = ${subst /, ,$@}}
-	${eval ORG = ${word 2, ${WORD_LIST}}}
-	${eval PROJECT = ${word 3, ${WORD_LIST}}}
-	${eval VERSION = ${word 4, ${WORD_LIST}}}
-	${eval FILE_NAME = ${word 5, ${WORD_LIST}}}
+	${call parse_lib_target}
 	${Q}mkdir -p ${dir $@}
-	${call get_archive,${ORG}/${PROJECT},${VERSION},${FILE_NAME},$@}
-	${Q}ln -sf ${shell pwd}/$@ ${shell pwd}/${LIB_PATH}/${FILE_NAME}
+	${call get_archive,${LIB_ORG}/${LIB_PROJECT},${LIB_VERSION},${LIB_FILE},$@}
+	${Q}ln -sf $(CURDIR)/$@ $(CURDIR)/${LIB_PATH}/${LIB_FILE}
 
 ${LIB_PATH}/%.h:
-	${eval WORD_LIST = ${subst /, ,$@}}
-	${eval ORG = ${word 2, ${WORD_LIST}}}
-	${eval PROJECT = ${word 3, ${WORD_LIST}}}
-	${eval VERSION = ${word 4, ${WORD_LIST}}}
-	${eval FILE_NAME = ${word 5, ${WORD_LIST}}}
+	${call parse_lib_target}
 	${Q}mkdir -p ${dir $@}
 	${Q}mkdir -p ${INCLUDE_PATH}
-	${call get_header,${ORG}/${PROJECT},${VERSION},${FILE_NAME},$@}
-	${Q}ln -sf ${shell pwd}/$@ ${shell pwd}/${INCLUDE_PATH}/${FILE_NAME}
+	${call get_header,${LIB_ORG}/${LIB_PROJECT},${LIB_VERSION},${LIB_FILE},$@}
+	${Q}ln -sf $(CURDIR)/$@ $(CURDIR)/${INCLUDE_PATH}/${LIB_FILE}
 
-set_prod_vars:
-	${eval CFLAGS = ${PROD_CFLAGS} ${CFLAGS}}
-	${eval LDFLAGS = ${PROD_LDFLAGS} ${LDFLAGS}}
+prod: CFLAGS += ${PROD_CFLAGS}
+prod: LDFLAGS += ${PROD_LDFLAGS}
+prod: dep ${APP_NAME}
 
-prod: set_prod_vars dep ${APP_NAME}
-
-package: set_prod_vars dep ${TAR_NAME}
+package: CFLAGS += ${PROD_CFLAGS}
+package: LDFLAGS += ${PROD_LDFLAGS}
+package: dep ${TAR_NAME}
 
 ${TAR_NAME}: ${PACKAGE_CONTENTS}
 	${call print,${GREEN}TAR $@}
@@ -172,9 +149,9 @@ ${INSTALL_PATH}/%:
 
 clean:
 	${call print,${BRIGHT_CYAN}CLEAN ${APP_NAME}}
-	${Q}${RM} ${APP_NAME} ${TAR_NAME} ${APP_NAME:%=${SRC_PATH}/%.o} ${APP_NAME:%=lib%.*} ${COMP_O} ${UTILS_O}
+	${Q}${RM} ${APP_NAME} ${TAR_NAME} ${APP_NAME:%=${SRC_PATH}/%.o} ${APP_NAME:%=${SRC_PATH}/%.d} ${APP_NAME:%=lib%.*} ${COMP_O} ${UTILS_O} ${COMP_O:%.o=%.d} ${UTILS_O:%.o=%.d}
 	${Q}${RM} -R ${DIST_PATH}
 	${call print,${BRIGHT_CYAN}CLEAN tests}
 	${Q}${RM} ${TESTS_OUT}
 
-.PHONY: preprocess package test test_compile clean set_prod_vars set_debug_vars prod all set_pic install install_share_folder install_shared install_binary install_static dep
+.PHONY: preprocess package test test_compile clean prod all install install_share_folder install_shared install_binary install_static static_library shared_library release dep

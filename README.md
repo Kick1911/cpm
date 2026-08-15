@@ -51,9 +51,9 @@ $ make shared_library
 
 ## Run tests
 ```bash
-$ export DEBUG=-g3
-$ make clean;cd tests;make
-$ make test target=./test_<component>.out # Run one test
+$ make clean && make test # Build and run every test under valgrind
+$ make clean && make tests/test_<component>.out # Build one test
+$ valgrind --error-exitcode=1 --leak-check=full ./tests/test_<component>.out # Run one test
 ```
 
 ## Gitlab CI
