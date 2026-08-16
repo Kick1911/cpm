@@ -7,10 +7,12 @@
 
 CPM_APP_FUNCTION(init);
 CPM_APP_FUNCTION(update);
+CPM_APP_FUNCTION(version);
 
 const cpm_app_t cpm_apps[] = {
     CPM_REGISTER_APP(init),
     CPM_REGISTER_APP(update),
+    CPM_REGISTER_APP(version),
     {NULL, NULL}
 };
 
