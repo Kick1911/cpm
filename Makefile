@@ -16,7 +16,7 @@ TEMP_OBJECTS_PATH := /tmp/${APP_NAME}_objs
 TAR_NAME ?= ${word 1,${APP_NAME}}-${VERSION}.tar.gz
 PACKAGE_CONTENTS ?= ${APP_NAME} ${ARCHIVE_FILES}
 
-all: CFLAGS += -g3 -DLOG_LEVEL=1 -fsanitize=address -fsanitize=undefined
+all: CFLAGS += -g3 -DLOG_LEVEL=1 -fsanitize=undefined
 all: dep ${APP_NAME}
 
 ${APP_NAME}: %: ${SRC_PATH}/%.o ${COMP_O} ${UTILS_O}
